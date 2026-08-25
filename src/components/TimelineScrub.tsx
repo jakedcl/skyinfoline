@@ -13,6 +13,10 @@ export function TimelineScrub({
   value,
   onChange,
 }: TimelineScrubProps) {
+  const nudge = (delta: number) => {
+    onChange(Math.min(max, Math.max(min, value + delta)));
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 px-6">
       <div className="flex items-baseline justify-between gap-4">
@@ -22,9 +26,27 @@ export function TimelineScrub({
         >
           Skyline year
         </label>
-        <span className="font-[family-name:var(--font-display)] text-2xl tabular-nums text-[var(--ink)]">
-          {value}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => nudge(-10)}
+            className="border border-[var(--line)] px-2 py-1 text-xs text-[var(--ink-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            aria-label="Go back 10 years"
+          >
+            −10
+          </button>
+          <span className="min-w-[4.5rem] text-center text-2xl tabular-nums text-[var(--ink)]">
+            {value}
+          </span>
+          <button
+            type="button"
+            onClick={() => nudge(10)}
+            className="border border-[var(--line)] px-2 py-1 text-xs text-[var(--ink-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+            aria-label="Go forward 10 years"
+          >
+            +10
+          </button>
+        </div>
       </div>
 
       <input
@@ -32,8 +54,10 @@ export function TimelineScrub({
         type="range"
         min={min}
         max={max}
+        step={1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
+        onInput={(e) => onChange(Number((e.target as HTMLInputElement).value))}
         className="year-range w-full"
         aria-valuemin={min}
         aria-valuemax={max}
