@@ -53,7 +53,7 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="shrink-0 border border-[var(--line)] px-3 py-1.5 text-xs tracking-wider text-[var(--ink-muted)] uppercase transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                className="relative z-10 shrink-0 border border-[var(--line)] bg-[var(--panel)] px-3 py-1.5 text-xs tracking-wider text-[var(--ink-muted)] uppercase transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
               >
                 Close
               </button>

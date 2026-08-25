@@ -84,37 +84,49 @@ body {
 }
 
 .year-range {
+  -webkit-appearance: none;
   appearance: none;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--steel) 0%,
-    var(--accent) 100%
-  );
-  border-radius: 999px;
+  width: 100%;
+  height: 28px;
+  background: transparent;
   outline: none;
   cursor: pointer;
+  margin: 0;
+}
+
+.year-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--steel) 0%, var(--accent) 100%);
 }
 
 .year-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
   border-radius: 50%;
   background: var(--accent);
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(14, 20, 27, 0.35);
-  cursor: pointer;
+  cursor: grab;
+}
+
+.year-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--steel) 0%, var(--accent) 100%);
 }
 
 .year-range::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: var(--accent);
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(14, 20, 27, 0.35);
-  cursor: pointer;
+  cursor: grab;
 }
 
 .detail-panel {
