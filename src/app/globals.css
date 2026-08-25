@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+:root {
+  --sky-top: #1a2332;
+  --sky-mid: #3d5a73;
+  --sky-low: #8fa8b8;
+  --horizon: #c5d4dc;
+  --water: #2a4558;
+  --water-shine: #3d6a82;
+  --ink: #0e141b;
+  --ink-soft: #2a3542;
+  --ink-muted: #6b7c8c;
+  --steel: #2c3a48;
+  --steel-bright: #4a5d70;
+  --panel: #f2f5f7;
+  --panel-deep: #e4ebf0;
+  --line: #c8d3dc;
+  --accent: #d4892a;
+  --river: #2f6f8f;
+  --background: var(--horizon);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-ui);
+  --font-display: var(--font-ui);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  color: var(--ink);
+  font-family:
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
+  background: var(--horizon);
+}
+
+.sky-atmosphere {
+  background:
+    radial-gradient(
+      ellipse 80% 50% at 50% 100%,
+      rgba(232, 168, 56, 0.12),
+      transparent 55%
+    ),
+    linear-gradient(
+      180deg,
+      var(--sky-top) 0%,
+      var(--sky-mid) 42%,
+      var(--sky-low) 72%,
+      var(--horizon) 100%
+    );
+}
+
+.water-plane {
+  background: linear-gradient(
+    180deg,
+    var(--water-shine) 0%,
+    var(--water) 55%,
+    #1c3040 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.skyline-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--steel-bright) transparent;
+}
+
+.skyline-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.skyline-scroll::-webkit-scrollbar-thumb {
+  background: var(--steel-bright);
+  border-radius: 999px;
+}
+
+.year-range {
+  appearance: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--steel) 0%,
+    var(--accent) 100%
+  );
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.year-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(14, 20, 27, 0.35);
+  cursor: pointer;
+}
+
+.year-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(14, 20, 27, 0.35);
+  cursor: pointer;
+}
+
+.detail-panel {
+  transition-property: max-height, opacity;
+  transition-duration: 400ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes brand-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-brand-in {
+  animation: brand-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-brand-in-delay {
+  animation: brand-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
