@@ -15,13 +15,13 @@ export default async function Home() {
 
         <div className="relative z-10 mx-auto max-w-6xl px-6">
           <p className="animate-brand-in text-xs tracking-[0.35em] text-[var(--accent)] uppercase">
-            Brooklyn looking west
+            Jersey City looking east
           </p>
           <h1 className="animate-brand-in mt-3 text-5xl font-semibold tracking-tight text-white md:text-7xl">
             Skyinfoline
           </h1>
           <p className="animate-brand-in-delay mt-4 max-w-md text-base leading-relaxed text-[var(--horizon)]/85 md:text-lg">
-            Manhattan towers in one row—south to north. Click a silhouette to
+            Manhattan towers in one row—north to south. Click a silhouette to
             learn its story; scrub the year to watch the skyline grow.
           </p>
         </div>

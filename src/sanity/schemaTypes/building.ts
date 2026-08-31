@@ -2,7 +2,7 @@ import { defineField, defineType } from "sanity";
 
 /**
  * One Manhattan tower on the skyline.
- * orderIndex: lower = farther south = farther left.
+ * orderIndex: lower = farther south. Drawn north→south (left→right) from Jersey City.
  * cutout: transparent PNG preferred — used on the skyline when set.
  * skylineImportance: editorial weight (not shown as a number on the site).
  */
@@ -80,7 +80,8 @@ export const buildingType = defineType({
       name: "orderIndex",
       title: "Skyline order",
       type: "number",
-      description: "Left → right = south → north. Lower number = farther left.",
+      description:
+        "Geographic index: lower = farther south. Jersey City view shows north on the left (higher numbers left).",
       validation: (Rule) => Rule.required().integer(),
     }),
     defineField({
@@ -159,9 +160,14 @@ export const buildingType = defineType({
   ],
   orderings: [
     {
-      title: "Skyline order",
+      title: "Skyline order (south → north index)",
       name: "orderAsc",
       by: [{ field: "orderIndex", direction: "asc" }],
+    },
+    {
+      title: "Display order (Jersey City: north left)",
+      name: "orderDesc",
+      by: [{ field: "orderIndex", direction: "desc" }],
     },
     {
       title: "Skyline importance",

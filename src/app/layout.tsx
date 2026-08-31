@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Skyinfoline — NYC Skyline",
   description:
-    "A stylized, interactive Manhattan skyline from Brooklyn—explore towers south to north.",
+    "A stylized, interactive Manhattan skyline from Jersey City—explore towers north to south.",
 };
 
 const uiFontStyle = {

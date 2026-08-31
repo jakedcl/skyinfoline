@@ -23,7 +23,8 @@ export type Building = {
   yearCompleted: number;
   architect?: string;
   status: BuildingStatus;
-  /** Skyline position: lower = south = left */
+  /** Geographic index along Manhattan: lower = farther south.
+   * Jersey City view draws north→south left→right (sorted descending). */
   orderIndex: number;
   neighborhood?: string;
   /** Skyline zone (Downtown, Hudson Yards, …) */

@@ -98,7 +98,7 @@ export function Skyline({
             transform: `scale(${scale})`,
             width: contentWidth || "max-content",
           }}
-          aria-label="Manhattan skyline, south to north"
+          aria-label="Manhattan skyline from Jersey City, north to south"
         >
           {ordered.map((building) => {
             const built = isBuiltByYear(building, scrubYear);

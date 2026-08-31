@@ -1,7 +1,7 @@
 import { defineQuery } from "next-sanity";
 
 export const BUILDINGS_QUERY = defineQuery(`
-  *[_type == "building" && defined(slug.current)] | order(orderIndex asc) {
+  *[_type == "building" && defined(slug.current)] | order(orderIndex desc) {
     "id": slug.current,
     name,
     heightFt,

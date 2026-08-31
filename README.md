@@ -1,6 +1,6 @@
 # Skyinfoline
 
-Interactive, stylized Manhattan skyline (Brooklyn / east perspective). Left → right = south → north.
+Interactive, stylized Manhattan skyline (Jersey City / west perspective). Left → right = north → south.
 
 ## Stack
 
@@ -13,7 +13,7 @@ Interactive, stylized Manhattan skyline (Brooklyn / east perspective). Left → 
 2. Sign in with your Sanity account
 3. **Create / edit / delete** Building documents
 4. Upload a **transparent PNG** on the “Skyline cutout” field
-5. Set **Skyline order** (`orderIndex`) — lower = farther south = farther left
+5. Set **Skyline order** (`orderIndex`) — lower = farther south; the skyline draws north→south (left→right) from Jersey City.
 6. Click **Publish**
 
 The live site reads published buildings from Sanity. No code deploy needed for content changes.
