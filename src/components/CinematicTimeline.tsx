@@ -22,8 +22,10 @@ export function CinematicTimeline({
   const rafRef = useRef<number | null>(null);
   const lastTickRef = useRef(0);
   const valueRef = useRef(value);
+  const onChangeRef = useRef(onChange);
 
   valueRef.current = value;
+  onChangeRef.current = onChange;
 
   const era = eraForYear(value);
   const progress = eraProgress(value, era);
@@ -50,7 +52,7 @@ export function CinematicTimeline({
         const steps = Math.floor(elapsed / PLAY_MS_PER_YEAR);
         lastTickRef.current += steps * PLAY_MS_PER_YEAR;
         const next = Math.min(max, valueRef.current + steps);
-        onChange(next);
+        onChangeRef.current(next);
         if (next >= max) {
           stopPlayback();
           return;
@@ -63,7 +65,7 @@ export function CinematicTimeline({
     return () => {
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [playing, max, onChange, stopPlayback]);
+  }, [playing, max, stopPlayback]);
 
   useEffect(() => () => stopPlayback(), [stopPlayback]);
 

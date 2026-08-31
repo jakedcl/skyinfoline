@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BuildingDetail } from "@/components/BuildingDetail";
 import { CinematicTimeline } from "@/components/CinematicTimeline";
 import { Skyline } from "@/components/Skyline";
@@ -51,6 +51,16 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
     }
     return ids;
   }, [buildings, scrubYear, prevScrubYear]);
+
+  useEffect(() => {
+    if (selected && selected.yearCompleted > scrubYear) {
+      setSelectedId(null);
+    }
+  }, [scrubYear, selected]);
+
+  const handleScrubChange = useCallback((year: number) => {
+    setScrubYear(year);
+  }, []);
 
   useEffect(() => {
     setPrevScrubYear(scrubYear);
@@ -126,12 +136,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           min={min}
           max={max}
           value={scrubYear}
-          onChange={(year) => {
-            setScrubYear(year);
-            if (selected && selected.yearCompleted > year) {
-              setSelectedId(null);
-            }
-          }}
+          onChange={handleScrubChange}
         />
       </div>
 
