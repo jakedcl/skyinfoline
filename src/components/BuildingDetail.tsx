@@ -14,7 +14,7 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
     <aside
       className={[
         "detail-panel relative overflow-hidden border-t border-[var(--line)] bg-[var(--panel)]/90 backdrop-blur-md transition-[max-height,opacity] duration-400 ease-out",
-        building ? "max-h-[28rem] opacity-100" : "max-h-0 opacity-0",
+        building ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0 pointer-events-none",
       ].join(" ")}
       aria-live="polite"
       aria-hidden={!building}
