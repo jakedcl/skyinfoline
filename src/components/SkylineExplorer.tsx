@@ -1,10 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BuildingDetail } from "@/components/BuildingDetail";
 import { Skyline } from "@/components/Skyline";
 import { TimelineScrub } from "@/components/TimelineScrub";
-import { findBuilding, yearRange } from "@/lib/buildings";
+import {
+  findBuilding,
+  skylineNeighbors,
+  yearRange,
+} from "@/lib/buildings";
 import type { Building } from "@/types/building";
 
 type SkylineExplorerProps = {
@@ -18,6 +22,38 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const selected = findBuilding(buildings, selectedId);
+  const { prevId, nextId } = useMemo(
+    () => skylineNeighbors(buildings, selectedId, scrubYear),
+    [buildings, selectedId, scrubYear],
+  );
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft" && prevId) {
+        event.preventDefault();
+        setSelectedId(prevId);
+      } else if (event.key === "ArrowRight" && nextId) {
+        event.preventDefault();
+        setSelectedId(nextId);
+      } else if (event.key === "Escape" && selectedId) {
+        setSelectedId(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [prevId, nextId, selectedId]);
 
   return (
     <div className="flex w-full flex-col">
