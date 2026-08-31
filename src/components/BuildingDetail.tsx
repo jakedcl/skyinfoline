@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { BuildingSilhouetteShape } from "@/components/BuildingSilhouette";
-import type { Building } from "@/types/building";
+import { CLUSTER_LABELS, type Building } from "@/types/building";
 
 type BuildingDetailProps = {
   building: Building | null;
@@ -44,11 +44,23 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs tracking-[0.2em] text-[var(--accent)] uppercase">
-                  {building.neighborhood ?? "Manhattan"}
+                  {[
+                    building.cluster
+                      ? CLUSTER_LABELS[building.cluster]
+                      : null,
+                    building.neighborhood,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || "Manhattan"}
                 </p>
                 <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-3xl">
                   {building.name}
                 </h2>
+                {building.nicknames?.length ? (
+                  <p className="mt-1 text-sm text-[var(--ink-muted)]">
+                    Also known as {building.nicknames.join(", ")}
+                  </p>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -85,6 +97,14 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
                   <dt className="text-[var(--ink-muted)]">Architect</dt>
                   <dd className="font-medium text-[var(--ink)]">
                     {building.architect}
+                  </dd>
+                </div>
+              ) : null}
+              {building.style ? (
+                <div>
+                  <dt className="text-[var(--ink-muted)]">Style</dt>
+                  <dd className="font-medium text-[var(--ink)]">
+                    {building.style}
                   </dd>
                 </div>
               ) : null}

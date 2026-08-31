@@ -4,6 +4,7 @@ import { defineField, defineType } from "sanity";
  * One Manhattan tower on the skyline.
  * orderIndex: lower = farther south = farther left.
  * cutout: transparent PNG preferred — used on the skyline when set.
+ * skylineImportance: editorial weight (not shown as a number on the site).
  */
 export const buildingType = defineType({
   name: "building",
@@ -23,6 +24,13 @@ export const buildingType = defineType({
       options: { source: "name", maxLength: 96 },
       validation: (Rule) => Rule.required(),
       description: "Stable id used in the app (e.g. empire-state).",
+    }),
+    defineField({
+      name: "nicknames",
+      title: "Nicknames / former names",
+      type: "array",
+      of: [{ type: "string" }],
+      options: { layout: "tags" },
     }),
     defineField({
       name: "heightFt",
@@ -48,6 +56,12 @@ export const buildingType = defineType({
       type: "string",
     }),
     defineField({
+      name: "style",
+      title: "Architectural style",
+      type: "string",
+      description: 'e.g. "Art Deco", "International Style", "Supertall"',
+    }),
+    defineField({
       name: "status",
       title: "Status",
       type: "string",
@@ -70,9 +84,35 @@ export const buildingType = defineType({
       validation: (Rule) => Rule.required().integer(),
     }),
     defineField({
+      name: "cluster",
+      title: "Skyline cluster",
+      type: "string",
+      description: "Which skyline zone this tower belongs to (for grouping/filtering).",
+      options: {
+        list: [
+          { title: "Downtown", value: "downtown" },
+          { title: "Midtown", value: "midtown" },
+          { title: "Midtown East", value: "midtown-east" },
+          { title: "Billionaires' Row", value: "billionaires-row" },
+          { title: "Hudson Yards", value: "hudson-yards" },
+          { title: "Upper West Side", value: "upper-west" },
+          { title: "Brooklyn", value: "brooklyn" },
+        ],
+      },
+    }),
+    defineField({
       name: "neighborhood",
       title: "Neighborhood",
       type: "string",
+    }),
+    defineField({
+      name: "skylineImportance",
+      title: "Skyline importance (1–10)",
+      type: "number",
+      description:
+        "Cultural / skyline weight — NOT shown as a number on the site. Higher = stronger silhouette presence (height ≠ importance).",
+      validation: (Rule) => Rule.min(1).max(10).integer(),
+      initialValue: 5,
     }),
     defineField({
       name: "cutout",
@@ -124,6 +164,11 @@ export const buildingType = defineType({
       by: [{ field: "orderIndex", direction: "asc" }],
     },
     {
+      title: "Skyline importance",
+      name: "importanceDesc",
+      by: [{ field: "skylineImportance", direction: "desc" }],
+    },
+    {
       title: "Year",
       name: "yearAsc",
       by: [{ field: "yearCompleted", direction: "asc" }],
@@ -132,16 +177,17 @@ export const buildingType = defineType({
   preview: {
     select: {
       title: "name",
-      subtitle: "neighborhood",
+      subtitle: "cluster",
       media: "cutout",
       orderIndex: "orderIndex",
       heightFt: "heightFt",
       year: "yearCompleted",
+      importance: "skylineImportance",
     },
-    prepare({ title, subtitle, media, orderIndex, heightFt, year }) {
+    prepare({ title, subtitle, media, orderIndex, heightFt, year, importance }) {
       return {
         title,
-        subtitle: `#${orderIndex ?? "?"} · ${heightFt ?? "?"} ft · ${year ?? "?"} · ${subtitle ?? "Manhattan"}`,
+        subtitle: `#${orderIndex ?? "?"} · ${heightFt ?? "?"} ft · ★${importance ?? "?"} · ${year ?? "?"} · ${subtitle ?? "Manhattan"}`,
         media,
       };
     },

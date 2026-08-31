@@ -1,8 +1,14 @@
-import type { Building, BuildingSilhouette, BuildingStatus } from "@/types/building";
+import type {
+  Building,
+  BuildingSilhouette,
+  BuildingStatus,
+  SkylineCluster,
+} from "@/types/building";
 import { buildings as fallbackBuildings } from "@/data/buildings";
 import { client } from "@/sanity/lib/client";
 import { urlForCutout } from "@/sanity/lib/image";
 import { BUILDINGS_QUERY } from "@/sanity/lib/queries";
+import { projectId } from "@/sanity/env";
 
 type SanityBuilding = {
   id: string;
@@ -14,6 +20,10 @@ type SanityBuilding = {
   status?: BuildingStatus;
   orderIndex: number;
   neighborhood?: string;
+  cluster?: SkylineCluster;
+  style?: string;
+  nicknames?: string[];
+  skylineImportance?: number;
   silhouette?: BuildingSilhouette;
   shortBlurb?: string;
   wikipediaUrl?: string;
@@ -25,9 +35,7 @@ type SanityBuilding = {
 
 function mapBuilding(doc: SanityBuilding): Building {
   const imageSrc =
-    doc.cutout?.asset != null
-      ? urlForCutout(doc.cutout).url()
-      : undefined;
+    doc.cutout?.asset != null ? urlForCutout(doc.cutout).url() : undefined;
 
   return {
     id: doc.id,
@@ -39,6 +47,10 @@ function mapBuilding(doc: SanityBuilding): Building {
     status: doc.status ?? "completed",
     orderIndex: doc.orderIndex,
     neighborhood: doc.neighborhood,
+    cluster: doc.cluster,
+    style: doc.style,
+    nicknames: doc.nicknames,
+    skylineImportance: doc.skylineImportance ?? 5,
     silhouette: doc.silhouette ?? "rect",
     shortBlurb: doc.shortBlurb,
     wikipediaUrl: doc.wikipediaUrl,
@@ -48,6 +60,10 @@ function mapBuilding(doc: SanityBuilding): Building {
 
 /** Load buildings from Sanity; fall back to local seed if empty/unavailable. */
 export async function getBuildings(): Promise<Building[]> {
+  if (!projectId) {
+    return fallbackBuildings;
+  }
+
   try {
     const docs = await client.fetch<SanityBuilding[]>(BUILDINGS_QUERY);
     if (!docs?.length) return fallbackBuildings;
