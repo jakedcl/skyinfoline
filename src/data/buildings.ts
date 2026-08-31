@@ -2,7 +2,7 @@ import type { Building } from "@/types/building";
 
 /**
  * Manhattan skyline seed data.
- * orderIndex: left → right = south → north (Brooklyn / east perspective).
+ * orderIndex: lower = farther south. Displayed north→south left→right (Jersey City view).
  * Drop transparent PNGs in /public/buildings and set imageSrc to use them.
  */
 export const buildings: Building[] = [

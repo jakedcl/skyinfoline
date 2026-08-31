@@ -1,7 +1,8 @@
 import type { Building } from "@/types/building";
 
 export function sortedByOrder(buildings: Building[]): Building[] {
-  return [...buildings].sort((a, b) => a.orderIndex - b.orderIndex);
+  // Jersey City view: left = north (higher orderIndex), right = south
+  return [...buildings].sort((a, b) => b.orderIndex - a.orderIndex);
 }
 
 export function maxHeight(buildings: Building[]): number {
