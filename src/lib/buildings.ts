@@ -1,8 +1,15 @@
 import type { Building } from "@/types/building";
+import type { SortDirection } from "@/lib/viewpoints";
 
-export function sortedByOrder(buildings: Building[]): Building[] {
-  // Jersey City view: left = north (higher orderIndex), right = south
-  return [...buildings].sort((a, b) => b.orderIndex - a.orderIndex);
+export function sortedByOrder(
+  buildings: Building[],
+  direction: SortDirection = "desc",
+): Building[] {
+  return [...buildings].sort((a, b) =>
+    direction === "desc"
+      ? b.orderIndex - a.orderIndex
+      : a.orderIndex - b.orderIndex,
+  );
 }
 
 export function maxHeight(buildings: Building[]): number {
@@ -36,13 +43,14 @@ export function findBuilding(
   return buildings.find((b) => b.id === id) ?? null;
 }
 
-/** Neighbors in Jersey City display order (left = north, right = south). */
+/** Neighbors in current display order (left → right). */
 export function skylineNeighbors(
   buildings: Building[],
   selectedId: string | null,
   scrubYear?: number,
+  sortDirection: SortDirection = "desc",
 ): { prevId: string | null; nextId: string | null } {
-  const row = sortedByOrder(buildings).filter((b) =>
+  const row = sortedByOrder(buildings, sortDirection).filter((b) =>
     scrubYear == null ? true : isBuiltByYear(b, scrubYear),
   );
   const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
