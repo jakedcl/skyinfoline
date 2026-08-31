@@ -8,6 +8,7 @@ import {
 } from "@/components/BuildingSilhouette";
 import type { Building } from "@/types/building";
 import { isBuiltByYear, maxHeight, sortedByOrder } from "@/lib/buildings";
+import { importancePresence } from "@/lib/importance";
 
 const SKYLINE_MAX_PX = 320;
 const MAX_WIDTH_PX = 48;
@@ -108,6 +109,7 @@ export function Skyline({
             const widthPx = buildingWidthPx(building, tallest);
             const selected = selectedId === building.id;
             const hovered = hoveredId === building.id;
+            const presence = importancePresence(building.skylineImportance);
 
             return (
               <button
@@ -124,13 +126,14 @@ export function Skyline({
                 className={[
                   "group relative flex shrink-0 flex-col items-center outline-none transition-[opacity,transform] duration-300 ease-out",
                   built
-                    ? "cursor-pointer opacity-100"
+                    ? "cursor-pointer"
                     : "cursor-not-allowed opacity-[0.14]",
                   selected || hovered ? "-translate-y-1.5" : "translate-y-0",
                 ].join(" ")}
                 style={{
                   width: widthPx + HIT_PAD_X * 2,
                   paddingInline: HIT_PAD_X,
+                  opacity: built ? (selected || hovered ? 1 : presence) : undefined,
                 }}
               >
                 <span
