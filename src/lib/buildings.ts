@@ -35,3 +35,21 @@ export function findBuilding(
   if (!id) return null;
   return buildings.find((b) => b.id === id) ?? null;
 }
+
+/** Neighbors in Jersey City display order (left = north, right = south). */
+export function skylineNeighbors(
+  buildings: Building[],
+  selectedId: string | null,
+  scrubYear?: number,
+): { prevId: string | null; nextId: string | null } {
+  const row = sortedByOrder(buildings).filter((b) =>
+    scrubYear == null ? true : isBuiltByYear(b, scrubYear),
+  );
+  const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
+  if (index < 0) return { prevId: null, nextId: null };
+  return {
+    prevId: index > 0 ? row[index - 1].id : null,
+    nextId: index < row.length - 1 ? row[index + 1].id : null,
+  };
+}
+

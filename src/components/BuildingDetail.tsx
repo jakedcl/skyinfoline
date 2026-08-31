@@ -71,6 +71,10 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
               </button>
             </div>
 
+            <p className="mt-3 text-[11px] tracking-wider text-[var(--ink-muted)] uppercase">
+              ← → keys move along the skyline · Esc closes
+            </p>
+
             <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
               <div>
                 <dt className="text-[var(--ink-muted)]">Height</dt>
