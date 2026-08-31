@@ -8,6 +8,7 @@ import {
 } from "@/components/BuildingSilhouette";
 import type { Building } from "@/types/building";
 import { isBuiltByYear, maxHeight, sortedByOrder } from "@/lib/buildings";
+import type { SortDirection } from "@/lib/viewpoints";
 import { importancePresence } from "@/lib/importance";
 
 const SKYLINE_MAX_PX = 320;
@@ -21,6 +22,9 @@ type SkylineProps = {
   selectedId: string | null;
   hoveredId: string | null;
   scrubYear: number;
+  sortDirection?: SortDirection;
+  viewpointLabel?: string;
+  newlyBuiltIds?: Set<string>;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 };
@@ -40,10 +44,13 @@ export function Skyline({
   selectedId,
   hoveredId,
   scrubYear,
+  sortDirection = "desc",
+  viewpointLabel = "Manhattan skyline",
+  newlyBuiltIds,
   onSelect,
   onHover,
 }: SkylineProps) {
-  const ordered = sortedByOrder(buildings);
+  const ordered = sortedByOrder(buildings, sortDirection);
   const tallest = maxHeight(buildings) || 1;
   const scrollerRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -98,10 +105,11 @@ export function Skyline({
             transform: `scale(${scale})`,
             width: contentWidth || "max-content",
           }}
-          aria-label="Manhattan skyline from Jersey City, north to south"
+          aria-label={`${viewpointLabel}, towers along Manhattan`}
         >
           {ordered.map((building) => {
             const built = isBuiltByYear(building, scrubYear);
+            const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
             const heightPx = Math.max(
               28,
               (building.heightFt / tallest) * SKYLINE_MAX_PX,
@@ -129,6 +137,7 @@ export function Skyline({
                     ? "cursor-pointer"
                     : "cursor-not-allowed opacity-[0.14]",
                   selected || hovered ? "-translate-y-1.5" : "translate-y-0",
+                  justBuilt ? "building-entrance" : "",
                 ].join(" ")}
                 style={{
                   width: widthPx + HIT_PAD_X * 2,

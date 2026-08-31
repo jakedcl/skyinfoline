@@ -153,3 +153,120 @@ body {
 .animate-brand-in-delay {
   animation: brand-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
+
+/* ── Viewpoint atmosphere tints ── */
+.viewpoint-atmosphere {
+  transition: filter 0.7s ease;
+}
+
+.view-jersey-city {
+  filter: none;
+}
+
+.view-brooklyn-bridge {
+  filter: hue-rotate(-8deg) saturate(1.08);
+}
+
+.view-staten-island {
+  filter: hue-rotate(12deg) saturate(0.95) brightness(1.04);
+}
+
+.view-central-park {
+  filter: hue-rotate(-15deg) saturate(1.12) brightness(0.97);
+}
+
+/* ── Building entrance during timeline play ── */
+@keyframes building-rise {
+  0% {
+    opacity: 0.2;
+    transform: translateY(12px) scaleY(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scaleY(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.building-entrance {
+  animation: building-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Cinematic timeline ── */
+.timeline-year {
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.timeline-era-track {
+  background: var(--line);
+}
+
+.timeline-era-seg {
+  opacity: 0.55;
+}
+
+.timeline-era-early {
+  background: #8b7355;
+}
+.timeline-era-art-deco {
+  background: #b8860b;
+}
+.timeline-era-wartime {
+  background: #6b7c8c;
+}
+.timeline-era-modern {
+  background: #4a6a82;
+}
+.timeline-era-corporate {
+  background: #3d5a73;
+}
+.timeline-era-supertall {
+  background: #d4892a;
+}
+
+.cinematic-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+.cinematic-range::-webkit-slider-runnable-track {
+  height: 8px;
+  background: transparent;
+}
+
+.cinematic-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(14, 20, 27, 0.35);
+  cursor: grab;
+}
+
+.cinematic-range::-moz-range-track {
+  height: 8px;
+  background: transparent;
+}
+
+.cinematic-range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(14, 20, 27, 0.35);
+  cursor: grab;
+}
