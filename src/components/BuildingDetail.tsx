@@ -28,7 +28,7 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
                 alt={building.name}
                 width={112}
                 height={144}
-                className="h-full w-full object-contain object-bottom"
+                className="skyline-cutout h-full w-full object-contain object-bottom"
                 unoptimized
               />
             ) : (
