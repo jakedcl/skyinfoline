@@ -59,6 +59,35 @@ body {
     );
 }
 
+/* Aerial backdrop behind skyline cutouts */
+.skyline-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.skyline-hero__bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/background.png");
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.skyline-hero__bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(26, 35, 50, 0.35) 0%,
+    transparent 28%,
+    transparent 72%,
+    rgba(42, 69, 88, 0.45) 100%
+  );
+}
+
 .water-plane {
   background: linear-gradient(
     180deg,

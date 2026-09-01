@@ -10,7 +10,7 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <main className="sky-atmosphere flex flex-1 flex-col">
+      <main className="flex flex-1 flex-col">
         <SkylineExplorer buildings={buildings} />
       </main>
 
