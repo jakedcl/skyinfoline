@@ -22,6 +22,27 @@ export const buildings: Building[] = [
     wikipediaUrl: "https://en.wikipedia.org/wiki/One_World_Trade_Center",
   },
   {
+    id: "twin-towers",
+    name: "World Trade Center (Twin Towers)",
+    heightFt: 1368,
+    floors: 110,
+    yearCompleted: 1973,
+    yearDemolished: 2001,
+    architect: "Minoru Yamasaki; Emery Roth & Sons",
+    status: "demolished",
+    orderIndex: 12,
+    neighborhood: "Financial District",
+    cluster: "downtown",
+    style: "International Style",
+    nicknames: ["Twin Towers", "WTC"],
+    skylineImportance: 10,
+    silhouette: "rect",
+    shortBlurb:
+      "Dominant downtown pair from 1973 until 2001—the tallest buildings in the world at completion.",
+    wikipediaUrl:
+      "https://en.wikipedia.org/wiki/World_Trade_Center_(1973%E2%80%932001)",
+  },
+  {
     id: "three-wtc",
     name: "3 World Trade Center",
     heightFt: 1079,

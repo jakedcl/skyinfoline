@@ -16,6 +16,7 @@ type SanityBuilding = {
   heightFt: number;
   floors?: number;
   yearCompleted: number;
+  yearDemolished?: number;
   architect?: string;
   status?: BuildingStatus;
   orderIndex: number;
@@ -43,6 +44,7 @@ function mapBuilding(doc: SanityBuilding): Building {
     heightFt: doc.heightFt,
     floors: doc.floors,
     yearCompleted: doc.yearCompleted,
+    yearDemolished: doc.yearDemolished,
     architect: doc.architect,
     status: doc.status ?? "completed",
     orderIndex: doc.orderIndex,

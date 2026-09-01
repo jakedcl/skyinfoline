@@ -23,23 +23,44 @@ export function yearRange(buildings: Building[]): { min: number; max: number } {
   }
   let min = buildings[0].yearCompleted;
   let max = buildings[0].yearCompleted;
+  const now = new Date().getFullYear();
   for (const b of buildings) {
     min = Math.min(min, b.yearCompleted);
     max = Math.max(max, b.yearCompleted);
+    if (b.yearDemolished != null) {
+      max = Math.max(max, b.yearDemolished);
+    }
   }
-  return { min, max };
+  return { min, max: Math.max(max, now) };
 }
 
-/** True when the tower exists at the scrub year */
+/** True when the tower is on the skyline at this scrub year */
+export function isVisibleAtYear(building: Building, year: number): boolean {
+  if (year < building.yearCompleted) return false;
+  if (building.yearDemolished != null && year > building.yearDemolished) {
+    return false;
+  }
+  return true;
+}
+
+/** @deprecated Use isVisibleAtYear */
 export function isBuiltByYear(building: Building, year: number): boolean {
-  return building.yearCompleted <= year;
+  return isVisibleAtYear(building, year);
 }
 
+export function buildingsVisibleAtYear(
+  buildings: Building[],
+  year: number,
+): Building[] {
+  return buildings.filter((b) => isVisibleAtYear(b, year));
+}
+
+/** @deprecated Use buildingsVisibleAtYear */
 export function buildingsBuiltByYear(
   buildings: Building[],
   year: number,
 ): Building[] {
-  return buildings.filter((b) => isBuiltByYear(b, year));
+  return buildingsVisibleAtYear(buildings, year);
 }
 
 export function findBuilding(
@@ -58,7 +79,7 @@ export function skylineNeighbors(
   sortDirection: SortDirection = "desc",
 ): { prevId: string | null; nextId: string | null } {
   const row = sortedByOrder(buildings, sortDirection).filter((b) =>
-    scrubYear == null ? true : isBuiltByYear(b, scrubYear),
+    scrubYear == null ? true : isVisibleAtYear(b, scrubYear),
   );
   const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
   if (index < 0) return { prevId: null, nextId: null };

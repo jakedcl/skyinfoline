@@ -48,7 +48,31 @@ export const buildingType = defineType({
       name: "yearCompleted",
       title: "Year completed",
       type: "number",
+      description: "When the tower joined the skyline (opened / topped out).",
       validation: (Rule) => Rule.required().integer().min(1600).max(2100),
+    }),
+    defineField({
+      name: "yearDemolished",
+      title: "Year demolished / removed",
+      type: "number",
+      description:
+        "Optional. When the tower left the skyline (e.g. 2001 for Twin Towers). Leave empty if still standing.",
+      validation: (Rule) =>
+        Rule.integer()
+          .min(1600)
+          .max(2100)
+          .custom((value, context) => {
+            const completed = (context.document as { yearCompleted?: number })
+              ?.yearCompleted;
+            if (
+              value != null &&
+              completed != null &&
+              value < completed
+            ) {
+              return "Must be the same year or after year completed";
+            }
+            return true;
+          }),
     }),
     defineField({
       name: "architect",
@@ -188,12 +212,15 @@ export const buildingType = defineType({
       orderIndex: "orderIndex",
       heightFt: "heightFt",
       year: "yearCompleted",
+      demolished: "yearDemolished",
       importance: "skylineImportance",
     },
-    prepare({ title, subtitle, media, orderIndex, heightFt, year, importance }) {
+    prepare({ title, subtitle, media, orderIndex, heightFt, year, demolished, importance }) {
+      const years =
+        demolished != null ? `${year}–${demolished}` : `${year ?? "?"}`;
       return {
         title,
-        subtitle: `#${orderIndex ?? "?"} · ${heightFt ?? "?"} ft · ★${importance ?? "?"} · ${year ?? "?"} · ${subtitle ?? "Manhattan"}`,
+        subtitle: `#${orderIndex ?? "?"} · ${heightFt ?? "?"} ft · ★${importance ?? "?"} · ${years} · ${subtitle ?? "Manhattan"}`,
         media,
       };
     },

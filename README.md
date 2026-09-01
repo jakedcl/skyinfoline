@@ -16,7 +16,8 @@ Interactive, stylized Manhattan skyline (Jersey City / west perspective). Left �
 3. **Create / edit / delete** Building documents
 4. Upload a **transparent PNG** on the “Skyline cutout” field
 5. Set **Skyline order** (`orderIndex`) — lower = farther south; the skyline draws north→south (left→right) from Jersey City.
-6. Click **Publish**
+6. Optional **Year demolished** for towers no longer standing (e.g. Twin Towers: 2001). They appear only between completed and demolished years on the timeline.
+7. Click **Publish**
 
 The live site reads published buildings from Sanity. No code deploy needed for content changes.
 
