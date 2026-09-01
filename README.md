@@ -2,6 +2,8 @@
 
 Interactive, stylized Manhattan skyline (Jersey City / west perspective). Left → right = north → south.
 
+**Project roadmap:** see [`docs/PROJECTS.md`](./docs/PROJECTS.md) for structured work tabs (content, viewpoints v2, compare mode, etc.).
+
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind
