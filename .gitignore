@@ -33,9 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
-# large local cutout assets — keep README, not PNGs
-/building-cutouts/*.png
-/public/building-cutouts/*.png
+# generated cutout exports (local only — commit PNGs under building-cutouts/ or public/building-cutouts/)
 /outputs/building-cutouts/*.png
 
 # vercel

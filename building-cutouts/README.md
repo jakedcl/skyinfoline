@@ -2,6 +2,28 @@
 
 Drop **transparent PNG** cutouts here before running `npm run seed`.
 
+## Committing PNGs to git
+
+PNG cutouts in `building-cutouts/` and `public/building-cutouts/` are tracked by git (only `outputs/building-cutouts/` is ignored).
+
+After adding or updating cutouts:
+
+```bash
+git add public/building-cutouts/
+git commit -m "Add building cutout PNGs"
+git push
+```
+
+If you added PNGs before the gitignore fix, force-add them once:
+
+```bash
+git add -f public/building-cutouts/*.png
+git commit -m "Add building cutout PNGs"
+git push
+```
+
+Either folder works for the seed script; `public/building-cutouts/` is a common choice when assets should ship with the app.
+
 ## Naming convention
 
 The seed script accepts **either** format:
