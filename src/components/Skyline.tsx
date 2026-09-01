@@ -201,7 +201,7 @@ export function Skyline({
                 className={[
                   "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
                   built ? "cursor-pointer" : "pointer-events-none",
-                  selected || hovered ? "-translate-y-1.5" : "translate-y-0",
+                  selected || hovered ? "-translate-y-1.5 z-20" : "translate-y-0 z-0 group-focus-visible:z-20",
                   justBuilt ? "building-entrance" : "",
                 ].join(" ")}
                 style={{
