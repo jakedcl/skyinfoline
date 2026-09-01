@@ -44,7 +44,7 @@ Update this file when a tab’s status changes (`active` → `done` → `parked`
 
 ---
 
-## Tab 2 — Viewpoints v2 (per-view building lists) `parked`
+## Tab 2 — Viewpoints v2 (labels + per-view lists) `parked`
 
 **Goal:** Each viewpoint shows only the towers you’d actually see from there, in that order — not one global row with flipped labels.
 
@@ -56,31 +56,56 @@ Update this file when a tab’s status changes (`active` → `done` → `parked`
 - No east/west filtering (e.g. JC view can’t hide east-side-only towers)
 - Staten Island / Central Park labels are approximate on a 1D row
 
-**Proposed v2 model (sketch — not built yet):**
+**Preferred approach: labels / categories (no coordinates required)**
 
-```ts
-// Option A: viewpoint-specific lists in Sanity
-viewpoint: {
-  id: "jersey-city" | "brooklyn-bridge" | "staten-island" | ...
-  buildings: [
-    { building: ref, orderInView: number, visible: boolean }
-  ]
-}
+Instead of lat/lng, tag each building in Sanity with simple editorial labels you control:
 
-// Option B: coordinates + visibility rules (later)
-lat, lng  // optional on building
-// app computes order per viewpoint from bearing + occlusion rules
+| Field (sketch) | Example values | Purpose |
+|----------------|----------------|---------|
+| `manhattanSide` | `west` · `east` · `core` | Where on the island (west = Hudson Yards side, east = East River, core = prominent from many angles) |
+| `visibleFrom` | `jersey-city` · `brooklyn-bridge` · `staten-island` · `central-park` | Which viewpoints include this tower (multi-select) |
+| `orderIndex` | `10` · `20` · `30` | Still used for left→right order *within* a view (or add per-view order later) |
+
+**Example — “west side buildings viewed from Jersey”:**
+
+```
+One Vanderbilt
+  manhattanSide: east        → hidden from pure west-side JC filter
+  visibleFrom: [jersey-city, brooklyn-bridge]
+
+30 Hudson Yards
+  manhattanSide: west
+  visibleFrom: [jersey-city]
+
+Empire State
+  manhattanSide: core        → tall enough to see from almost anywhere
+  visibleFrom: [jersey-city, brooklyn-bridge, central-park, staten-island]
 ```
 
-**Examples of what each view would mean:**
-| Viewpoint | What shows | Order |
-|-----------|------------|-------|
-| Jersey City | West-of-median + prominent east towers | Left = north |
-| Brooklyn Bridge | Full width, classic postcard | Left = south |
-| Staten Island Ferry | Downtown cluster, south-facing | Visible-only subset |
-| Central Park | Midtown + south from north | Visible-only subset |
+**How the app would filter (when we build Tab 2):**
 
-**Sanity changes (when we build this):** new `viewpoint` document type or embedded arrays on `building`; possibly `lat`/`lng` later.
+```groq
+// Jersey City — west-side + core towers tagged for this view
+*[_type == "building" && "jersey-city" in visibleFrom]
+  | order(orderIndex desc)
+```
+
+Optional stricter JC filter: also require `manhattanSide in ["west", "core"]`.
+
+**Viewpoint → what it means (editorial, not GPS):**
+
+| Viewpoint | Typical filter |
+|-----------|----------------|
+| Jersey City | `visibleFrom` includes `jersey-city`; often `west` or `core` |
+| Brooklyn Bridge | `visibleFrom` includes `brooklyn-bridge`; full-width postcard row |
+| Staten Island Ferry | `visibleFrom` includes `staten-island`; downtown-heavy subset |
+| Central Park | `visibleFrom` includes `central-park`; midtown + south from north |
+
+**Per-view order (optional later):** if the same building sits differently in two views, add something like `orderJerseyCity: 120` or a small embedded list — only when one `orderIndex` isn’t enough.
+
+**Coordinates:** optional far-future upgrade if you want automation. Labels are enough for a curated, resume-quality site.
+
+**Sanity changes (when we build this):** add `manhattanSide` + `visibleFrom` fields to `building`; update GROQ per active viewpoint.
 
 **Depends on:** Tab 1 (enough buildings to make views meaningful).
 
