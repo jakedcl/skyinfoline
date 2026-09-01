@@ -112,6 +112,44 @@ body {
   overflow-y: visible;
 }
 
+.skyline-height-scale__line {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.skyline-height-scale__label {
+  position: absolute;
+  left: 10px;
+  font-family:
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.32);
+  text-shadow: 0 1px 2px rgba(10, 14, 20, 0.45);
+}
+
+.skyline-height-scale__unit {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  font-family:
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.22);
+}
+
 /* Angled label above tower — subway-map style, reads upward */
 .skyline-label {
   position: absolute;

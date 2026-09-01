@@ -14,14 +14,16 @@ import {
   maxHeight,
   sortedByOrder,
 } from "@/lib/buildings";
+import {
+  SKYLINE_MAX_PX,
+  SKYLINE_ROW_HEIGHT_PX,
+} from "@/lib/skyline-layout";
 import type { SortDirection } from "@/lib/viewpoints";
-
-const SKYLINE_MAX_PX = 320;
+import { SkylineHeightScale } from "@/components/SkylineHeightScale";
 const BASE_MAX_WIDTH_PX = 48;
 const MIN_WIDTH_PX = 16;
 const HIT_PAD_X = 4;
 const GAP_PX = 4;
-const LABEL_RESERVE_PX = 72;
 const SKYLINE_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SKYLINE_TRANSITION_MS = 550;
 
@@ -130,7 +132,7 @@ export function Skyline({
     return () => ro.disconnect();
   }, [ordered.length, scrubYear, eraFilter, visibleCount, maxWidthPx]);
 
-  const rowHeight = (SKYLINE_MAX_PX + 48 + LABEL_RESERVE_PX) * scale;
+  const rowHeight = SKYLINE_ROW_HEIGHT_PX * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
   const transition = `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`;
 
@@ -140,7 +142,7 @@ export function Skyline({
       className="skyline-scroll relative w-full overflow-x-auto"
     >
       <div
-        className="mx-auto overflow-visible"
+        className="relative mx-auto overflow-visible"
         style={{
           width: scaledWidth,
           height: rowHeight + 8,
@@ -148,12 +150,13 @@ export function Skyline({
           transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
         }}
       >
+        <SkylineHeightScale tallestFt={tallest} scale={scale} />
         <div
           ref={rowRef}
-          className="relative flex origin-top-left items-end justify-center pb-0 pt-20"
+          className="relative z-[1] flex origin-top-left items-end justify-center pb-0 pt-20"
           style={{
             gap: GAP_PX,
-            minHeight: SKYLINE_MAX_PX + 48 + LABEL_RESERVE_PX,
+            minHeight: SKYLINE_ROW_HEIGHT_PX,
             transform: `scale(${scale})`,
             width: contentWidth || "max-content",
             transition: `transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
