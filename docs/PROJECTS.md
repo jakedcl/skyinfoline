@@ -44,74 +44,7 @@ Update this file when a tab’s status changes (`active` → `done` → `parked`
 
 ---
 
-## Tab 2 — Viewpoints v2 (labels + per-view lists) `parked`
-
-**Goal:** Each viewpoint shows only the towers you’d actually see from there, in that order — not one global row with flipped labels.
-
-**Why it’s parked:** v1 works fine for content entry and demos. This is a data-model + CMS change; do it when the skyline content is solid.
-
-**Current limitation (v1):**
-- One `orderIndex` per building (south → north along the island)
-- Viewpoints only flip sort direction + relabel left/right
-- No east/west filtering (e.g. JC view can’t hide east-side-only towers)
-- Staten Island / Central Park labels are approximate on a 1D row
-
-**Preferred approach: labels / categories (no coordinates required)**
-
-Instead of lat/lng, tag each building in Sanity with simple editorial labels you control:
-
-| Field (sketch) | Example values | Purpose |
-|----------------|----------------|---------|
-| `manhattanSide` | `west` · `east` · `core` | Where on the island (west = Hudson Yards side, east = East River, core = prominent from many angles) |
-| `visibleFrom` | `jersey-city` · `brooklyn-bridge` · `staten-island` · `central-park` | Which viewpoints include this tower (multi-select) |
-| `orderIndex` | `10` · `20` · `30` | Still used for left→right order *within* a view (or add per-view order later) |
-
-**Example — “west side buildings viewed from Jersey”:**
-
-```
-One Vanderbilt
-  manhattanSide: east        → hidden from pure west-side JC filter
-  visibleFrom: [jersey-city, brooklyn-bridge]
-
-30 Hudson Yards
-  manhattanSide: west
-  visibleFrom: [jersey-city]
-
-Empire State
-  manhattanSide: core        → tall enough to see from almost anywhere
-  visibleFrom: [jersey-city, brooklyn-bridge, central-park, staten-island]
-```
-
-**How the app would filter (when we build Tab 2):**
-
-```groq
-// Jersey City — west-side + core towers tagged for this view
-*[_type == "building" && "jersey-city" in visibleFrom]
-  | order(orderIndex desc)
-```
-
-Optional stricter JC filter: also require `manhattanSide in ["west", "core"]`.
-
-**Viewpoint → what it means (editorial, not GPS):**
-
-| Viewpoint | Typical filter |
-|-----------|----------------|
-| Jersey City | `visibleFrom` includes `jersey-city`; often `west` or `core` |
-| Brooklyn Bridge | `visibleFrom` includes `brooklyn-bridge`; full-width postcard row |
-| Staten Island Ferry | `visibleFrom` includes `staten-island`; downtown-heavy subset |
-| Central Park | `visibleFrom` includes `central-park`; midtown + south from north |
-
-**Per-view order (optional later):** if the same building sits differently in two views, add something like `orderJerseyCity: 120` or a small embedded list — only when one `orderIndex` isn’t enough.
-
-**Coordinates:** optional far-future upgrade if you want automation. Labels are enough for a curated, resume-quality site.
-
-**Sanity changes (when we build this):** add `manhattanSide` + `visibleFrom` fields to `building`; update GROQ per active viewpoint.
-
-**Depends on:** Tab 1 (enough buildings to make views meaningful).
-
----
-
-## Tab 3 — Compare mode `parked`
+## Tab 2 — Compare mode `parked`
 
 **Goal:** Select two buildings side-by-side (height, year, architect, style, etc.).
 
@@ -119,7 +52,7 @@ Optional stricter JC filter: also require `manhattanSide in ["west", "core"]`.
 
 ---
 
-## Tab 4 — Resume / polish `next`
+## Tab 3 — Resume / polish `next`
 
 **Goal:** Make the site feel “out of this world” for portfolio.
 
@@ -134,15 +67,15 @@ Optional stricter JC filter: also require `manhattanSide in ["west", "core"]`.
 
 ---
 
-## Tab 5 — Cross-borough expansion `parked`
+## Tab 4 — Cross-borough expansion `parked`
 
 **Goal:** Brooklyn Tower, JC skyline, etc. as separate modes or layers — not mixed into Manhattan row.
 
-**Depends on:** Tab 2 (viewpoint system), Tab 1 (Manhattan complete).
+**Depends on:** Tab 1 (Manhattan complete).
 
 ---
 
-## Tab 6 — Image pipeline `parked`
+## Tab 5 — Image pipeline `parked`
 
 **Goal:** Semi-automate finding silhouettes, background removal, upload to Sanity.
 
@@ -158,7 +91,7 @@ Optional stricter JC filter: also require `manhattanSide in ["west", "core"]`.
 - Interactive 2D skyline (relative height scaling)
 - Building detail panel + keyboard nav (← → Esc)
 - Cinematic era timeline (play/pause, era chips)
-- Viewpoint switcher (sort flip + atmosphere — not per-view lists yet)
+- Two viewpoints: **Jersey City** (north → south) and **Brooklyn Bridge** (south → north)
 - `cluster`, `style`, `nicknames`, `skylineImportance` fields
 
 ---

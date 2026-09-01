@@ -21,8 +21,8 @@ export default async function Home() {
             Skyinfoline
           </h1>
           <p className="animate-brand-in-delay mt-4 max-w-lg text-base leading-relaxed text-[var(--horizon)]/85 md:text-lg">
-            Pick a viewpoint, scrub through history, and watch the skyline rise.
-            Click a tower to explore its story.
+            Jersey City or Brooklyn Bridge—same towers, two directions.
+            Scrub through history and click a silhouette to explore.
           </p>
         </div>
 
