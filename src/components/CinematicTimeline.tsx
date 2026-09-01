@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { eraForYear, eraProgress, SKYLINE_ERAS } from "@/lib/eras";
+import { eraForYear, eraJumpYear, eraProgress, SKYLINE_ERAS } from "@/lib/eras";
 
 type CinematicTimelineProps = {
   min: number;
@@ -73,9 +73,11 @@ export function CinematicTimeline({
     (e) => e.endYear >= min && e.startYear <= max,
   );
 
-  const jumpToEra = (startYear: number) => {
+  const jumpToEra = (era: (typeof SKYLINE_ERAS)[number]) => {
     stopPlayback();
-    onChange(Math.max(min, Math.min(max, startYear)));
+    onChange(
+      Math.max(min, Math.min(max, eraJumpYear(era, max))),
+    );
   };
 
   const jumpToPresent = () => {
@@ -127,7 +129,7 @@ export function CinematicTimeline({
             <button
               key={e.id}
               type="button"
-              onClick={() => jumpToEra(e.startYear)}
+              onClick={() => jumpToEra(e)}
               className={[
                 "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
                 active
