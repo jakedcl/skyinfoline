@@ -17,7 +17,6 @@ type CinematicTimelineProps = {
   eraFilterId?: string | null;
   onChange: (year: number) => void;
   onEraSelect: (eraId: string | null) => void;
-  onJumpToPresent: () => void;
 };
 
 const PLAY_MS_PER_YEAR = 55;
@@ -29,7 +28,6 @@ export function CinematicTimeline({
   eraFilterId = null,
   onChange,
   onEraSelect,
-  onJumpToPresent,
 }: CinematicTimelineProps) {
   const [playing, setPlaying] = useState(false);
   const rafRef = useRef<number | null>(null);
@@ -95,11 +93,6 @@ export function CinematicTimeline({
     onEraSelect(era.id);
   };
 
-  const jumpToPresent = () => {
-    stopPlayback();
-    onJumpToPresent();
-  };
-
   const nudge = (delta: number) => {
     stopPlayback();
     onChange(
@@ -146,7 +139,7 @@ export function CinematicTimeline({
         </p>
       </div>
 
-      {/* Era chips + jump to present */}
+      {/* Era chips */}
       <div className="flex flex-wrap justify-center gap-2">
         {visibleEras.map((e) => {
           const filtered = eraFilterId === e.id;
@@ -167,19 +160,6 @@ export function CinematicTimeline({
             </button>
           );
         })}
-        <button
-          type="button"
-          onClick={jumpToPresent}
-          className={[
-            "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
-            !eraFilterId && value === max
-              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-              : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
-          ].join(" ")}
-          aria-label={`Show full skyline at present (${max})`}
-        >
-          Today · {max}
-        </button>
       </div>
 
       {/* Track with era segments */}
