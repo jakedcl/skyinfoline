@@ -126,9 +126,17 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
 
   return (
     <div className="flex w-full flex-col">
-      <div className="mb-6">
-        <ViewpointSwitcher value={viewpointId} onChange={handleViewpointChange} />
-      </div>
+      <nav className="border-b border-white/10 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+          <h1 className="text-base font-semibold tracking-tight text-white sm:text-lg">
+            Skyinfoline
+          </h1>
+          <ViewpointSwitcher
+            value={viewpointId}
+            onChange={handleViewpointChange}
+          />
+        </div>
+      </nav>
 
       <div
         className={[

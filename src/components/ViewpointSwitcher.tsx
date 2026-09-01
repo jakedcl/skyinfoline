@@ -10,46 +10,39 @@ type ViewpointSwitcherProps = {
 
 export function ViewpointSwitcher({ value, onChange }: ViewpointSwitcherProps) {
   return (
-    <div className="mx-auto w-full max-w-4xl px-6">
-      <p className="mb-2 text-center text-[11px] tracking-[0.22em] text-[var(--horizon)]/70 uppercase">
-        Viewpoint
-      </p>
-      <div
-        className="flex flex-wrap justify-center gap-2"
-        role="tablist"
-        aria-label="Skyline viewpoint"
-      >
-        {VIEWPOINTS.map((vp: Viewpoint) => {
-          const active = vp.id === value;
-          return (
-            <button
-              key={vp.id}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => onChange(vp.id)}
+    <div
+      className="flex flex-wrap items-center justify-end gap-1.5"
+      role="tablist"
+      aria-label="Skyline viewpoint"
+    >
+      {VIEWPOINTS.map((vp: Viewpoint) => {
+        const active = vp.id === value;
+        return (
+          <button
+            key={vp.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(vp.id)}
+            className={[
+              "border px-2.5 py-1 text-[11px] tracking-wide transition-colors sm:px-3",
+              active
+                ? "border-[var(--accent)] bg-[var(--accent)]/15 text-white"
+                : "border-white/20 bg-white/5 text-[var(--horizon)]/75 hover:border-white/35 hover:bg-white/10",
+            ].join(" ")}
+          >
+            <span className="font-medium">{vp.label}</span>
+            <span
               className={[
-                "border px-3 py-2 text-left transition-colors sm:px-4",
-                active
-                  ? "border-[var(--accent)] bg-[var(--accent)]/15 text-white"
-                  : "border-white/20 bg-white/5 text-[var(--horizon)]/80 hover:border-white/40 hover:bg-white/10",
+                "ml-1.5 hidden text-[10px] uppercase sm:inline",
+                active ? "text-[var(--accent)]" : "text-[var(--horizon)]/50",
               ].join(" ")}
             >
-              <span className="block text-xs font-medium tracking-wide">
-                {vp.label}
-              </span>
-              <span
-                className={[
-                  "mt-0.5 block text-[10px] tracking-wider uppercase",
-                  active ? "text-[var(--accent)]" : "text-[var(--horizon)]/50",
-                ].join(" ")}
-              >
-                {vp.heading}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              {vp.heading}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
