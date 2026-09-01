@@ -238,7 +238,7 @@ export function Skyline({
                       alt=""
                       width={widthPx > 0 ? widthPx * 2 : 96}
                       height={heightPx > 0 ? heightPx * 2 : 128}
-                      className="block h-full w-full"
+                      className="skyline-cutout block h-full w-full"
                       style={{ objectFit: "fill" }}
                       unoptimized
                       onLoad={(event) => {
