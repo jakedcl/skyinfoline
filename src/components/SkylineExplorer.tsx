@@ -27,8 +27,10 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [viewpointId, setViewpointId] = useState<ViewpointId>("jersey-city");
   const [prevScrubYear, setPrevScrubYear] = useState(max);
   const [eraFilterId, setEraFilterId] = useState<string | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const eraFilter = eraById(eraFilterId);
+  const skipYearCheck = !hasInteracted;
 
   const viewpoint = getViewpoint(viewpointId);
 
@@ -41,8 +43,9 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         scrubYear,
         viewpoint.sortDirection,
         eraFilter,
+        skipYearCheck,
       ),
-    [buildings, selectedId, scrubYear, viewpoint.sortDirection, eraFilter],
+    [buildings, selectedId, scrubYear, viewpoint.sortDirection, eraFilter, skipYearCheck],
   );
 
   // Track buildings that just completed this scrub year (for entrance flash)
@@ -59,13 +62,17 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   }, [buildings, scrubYear, prevScrubYear]);
 
   useEffect(() => {
-    if (selected && !isSkylineVisible(selected, scrubYear, eraFilter)) {
+    if (
+      selected &&
+      !isSkylineVisible(selected, scrubYear, eraFilter, skipYearCheck)
+    ) {
       setSelectedId(null);
     }
-  }, [scrubYear, selected, eraFilter]);
+  }, [scrubYear, selected, eraFilter, skipYearCheck]);
 
   const handleScrubChange = useCallback(
     (year: number) => {
+      setHasInteracted(true);
       if (eraFilterId) {
         setEraFilterId(null);
       }
@@ -112,6 +119,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   };
 
   const handleEraSelect = (eraId: string | null) => {
+    setHasInteracted(true);
     if (eraId === eraFilterId) {
       setEraFilterId(null);
       return;
@@ -158,6 +166,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             hoveredId={hoveredId}
             scrubYear={scrubYear}
             eraFilter={eraFilter}
+            skipYearCheck={skipYearCheck}
             sortDirection={viewpoint.sortDirection}
             viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
             newlyBuiltIds={newlyBuiltIds}
