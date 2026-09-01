@@ -7,6 +7,7 @@ import { Skyline } from "@/components/Skyline";
 import { ViewpointSwitcher } from "@/components/ViewpointSwitcher";
 import {
   findBuilding,
+  isVisibleAtYear,
   skylineNeighbors,
   yearRange,
 } from "@/lib/buildings";
@@ -53,7 +54,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   }, [buildings, scrubYear, prevScrubYear]);
 
   useEffect(() => {
-    if (selected && selected.yearCompleted > scrubYear) {
+    if (selected && !isVisibleAtYear(selected, scrubYear)) {
       setSelectedId(null);
     }
   }, [scrubYear, selected]);

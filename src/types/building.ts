@@ -21,6 +21,8 @@ export type Building = {
   heightFt: number;
   floors?: number;
   yearCompleted: number;
+  /** When the tower left the skyline (demolished, collapsed, etc.) */
+  yearDemolished?: number;
   architect?: string;
   status: BuildingStatus;
   /** Geographic index along Manhattan: lower = farther south.

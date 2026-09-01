@@ -83,11 +83,19 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
                 </dd>
               </div>
               <div>
-                <dt className="text-[var(--ink-muted)]">Completed</dt>
+                <dt className="text-[var(--ink-muted)]">On skyline</dt>
                 <dd className="font-medium text-[var(--ink)]">
-                  {building.yearCompleted}
+                  {building.yearDemolished != null
+                    ? `${building.yearCompleted}–${building.yearDemolished}`
+                    : `${building.yearCompleted}–present`}
                 </dd>
               </div>
+              {building.status === "demolished" ? (
+                <div>
+                  <dt className="text-[var(--ink-muted)]">Status</dt>
+                  <dd className="font-medium text-[var(--ink)]">Demolished</dd>
+                </div>
+              ) : null}
               {building.floors != null ? (
                 <div>
                   <dt className="text-[var(--ink-muted)]">Floors</dt>

@@ -7,6 +7,7 @@ export const BUILDINGS_QUERY = defineQuery(`
     heightFt,
     floors,
     yearCompleted,
+    yearDemolished,
     architect,
     status,
     orderIndex,

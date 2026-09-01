@@ -8,8 +8,8 @@ import {
 } from "@/components/BuildingSilhouette";
 import type { Building } from "@/types/building";
 import {
-  buildingsBuiltByYear,
-  isBuiltByYear,
+  buildingsVisibleAtYear,
+  isVisibleAtYear,
   maxHeight,
   sortedByOrder,
 } from "@/lib/buildings";
@@ -69,7 +69,7 @@ export function Skyline({
 }: SkylineProps) {
   const ordered = sortedByOrder(buildings, sortDirection);
   const visible = useMemo(
-    () => buildingsBuiltByYear(ordered, scrubYear),
+    () => buildingsVisibleAtYear(ordered, scrubYear),
     [ordered, scrubYear],
   );
   const visibleCount = visible.length;
@@ -135,7 +135,7 @@ export function Skyline({
           aria-label={`${viewpointLabel}, towers along Manhattan`}
         >
           {ordered.map((building) => {
-            const built = isBuiltByYear(building, scrubYear);
+            const built = isVisibleAtYear(building, scrubYear);
             const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
             const heightPx = built
               ? Math.max(28, (building.heightFt / tallest) * SKYLINE_MAX_PX)
