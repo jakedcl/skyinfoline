@@ -33,6 +33,7 @@ type SkylineProps = {
   hoveredId: string | null;
   scrubYear: number;
   eraFilter?: Era | null;
+  skipYearCheck?: boolean;
   sortDirection?: SortDirection;
   viewpointLabel?: string;
   newlyBuiltIds?: Set<string>;
@@ -86,6 +87,7 @@ export function Skyline({
   hoveredId,
   scrubYear,
   eraFilter = null,
+  skipYearCheck = false,
   sortDirection = "desc",
   viewpointLabel = "Manhattan skyline",
   newlyBuiltIds,
@@ -94,8 +96,8 @@ export function Skyline({
 }: SkylineProps) {
   const ordered = sortedByOrder(buildings, sortDirection);
   const visible = useMemo(
-    () => buildingsVisibleInSkyline(ordered, scrubYear, eraFilter),
-    [ordered, scrubYear, eraFilter],
+    () => buildingsVisibleInSkyline(ordered, scrubYear, eraFilter, skipYearCheck),
+    [ordered, scrubYear, eraFilter, skipYearCheck],
   );
   const visibleCount = visible.length;
   const tallest = maxHeight(visible) || maxHeight(buildings) || 1;
@@ -130,7 +132,7 @@ export function Skyline({
     ro.observe(scroller);
     ro.observe(row);
     return () => ro.disconnect();
-  }, [ordered.length, scrubYear, eraFilter, visibleCount, maxWidthPx]);
+  }, [ordered.length, scrubYear, eraFilter, skipYearCheck, visibleCount, maxWidthPx]);
 
   const rowHeight = SKYLINE_ROW_HEIGHT_PX * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
@@ -164,7 +166,12 @@ export function Skyline({
           aria-label={`${viewpointLabel}, towers along Manhattan`}
         >
           {ordered.map((building) => {
-            const built = isSkylineVisible(building, scrubYear, eraFilter);
+            const built = isSkylineVisible(
+              building,
+              scrubYear,
+              eraFilter,
+              skipYearCheck,
+            );
             const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
             const { heightPx, widthPx } = built
               ? towerSize(

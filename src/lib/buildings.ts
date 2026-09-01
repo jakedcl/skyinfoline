@@ -69,9 +69,13 @@ export function isSkylineVisible(
   building: Building,
   scrubYear: number,
   eraFilter?: Era | null,
+  skipYearCheck = false,
 ): boolean {
   if (eraFilter && !buildingCompletedInEra(building, eraFilter)) {
     return false;
+  }
+  if (skipYearCheck) {
+    return true;
   }
   return isVisibleAtYear(building, scrubYear);
 }
@@ -80,8 +84,11 @@ export function buildingsVisibleInSkyline(
   buildings: Building[],
   scrubYear: number,
   eraFilter?: Era | null,
+  skipYearCheck = false,
 ): Building[] {
-  return buildings.filter((b) => isSkylineVisible(b, scrubYear, eraFilter));
+  return buildings.filter((b) =>
+    isSkylineVisible(b, scrubYear, eraFilter, skipYearCheck),
+  );
 }
 
 /** @deprecated Use buildingsVisibleAtYear */
@@ -104,16 +111,13 @@ export function findBuilding(
 export function skylineNeighbors(
   buildings: Building[],
   selectedId: string | null,
-  scrubYear?: number,
+  scrubYear: number,
   sortDirection: SortDirection = "desc",
   eraFilter?: Era | null,
+  skipYearCheck = false,
 ): { prevId: string | null; nextId: string | null } {
   const row = sortedByOrder(buildings, sortDirection).filter((b) =>
-    scrubYear == null
-      ? eraFilter
-        ? buildingCompletedInEra(b, eraFilter)
-        : true
-      : isSkylineVisible(b, scrubYear, eraFilter),
+    isSkylineVisible(b, scrubYear ?? 0, eraFilter, skipYearCheck),
   );
   const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
   if (index < 0) return { prevId: null, nextId: null };
