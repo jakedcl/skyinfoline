@@ -126,11 +126,6 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
     setScrubYear(Math.min(eraMax, Math.max(eraMin, jump)));
   };
 
-  const handleJumpToPresent = () => {
-    setEraFilterId(null);
-    setScrubYear(max);
-  };
-
   return (
     <div className="flex w-full flex-col">
       <div className="mb-6">
@@ -172,7 +167,6 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           eraFilterId={eraFilterId}
           onChange={handleScrubChange}
           onEraSelect={handleEraSelect}
-          onJumpToPresent={handleJumpToPresent}
         />
       </div>
 
