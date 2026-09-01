@@ -55,3 +55,19 @@ npm run dev
 - `npm run build` — production build
 - `npm run lint` — ESLint
 - `npm run seed` — re-seed Manhattan buildings (needs `SANITY_WRITE_TOKEN`)
+
+### Adding building cutout PNGs
+
+PNG files are gitignored (large assets). To add or refresh cutouts on **`main`**:
+
+```bash
+git checkout main
+git pull
+cp ~/Documents/Codex/.../building-cutouts/*.png building-cutouts/
+git add building-cutouts/
+git commit -m "Add building cutout PNGs"
+git push
+npm run seed
+```
+
+Use descriptive filenames as exported (see `building-cutouts/filename-map.json`) or rename to `{id}.png` — both work. See [`building-cutouts/README.md`](./building-cutouts/README.md) for the full filename list.
