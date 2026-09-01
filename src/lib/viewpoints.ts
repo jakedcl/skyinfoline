@@ -18,7 +18,7 @@ export type Viewpoint = {
 export const VIEWPOINTS: Viewpoint[] = [
   {
     id: "jersey-city",
-    label: "Jersey City",
+    label: "From Jersey",
     heading: "looking east",
     sortDirection: "desc",
     leftLabel: "North",
@@ -27,7 +27,7 @@ export const VIEWPOINTS: Viewpoint[] = [
   },
   {
     id: "brooklyn-bridge",
-    label: "Brooklyn Bridge",
+    label: "From Brooklyn",
     heading: "looking west",
     sortDirection: "asc",
     leftLabel: "South",
