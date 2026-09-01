@@ -6,49 +6,45 @@ export type Era = {
   tagline: string;
 };
 
-/** NYC skyline eras — chip jumps to endYear (peak of that chapter). */
+/**
+ * NYC skyline eras — each chip filters to towers completed in that window.
+ * Boundaries align with our seeded building dataset (1902–2025).
+ */
 export const SKYLINE_ERAS: Era[] = [
   {
     id: "early",
     label: "Early Skyscrapers",
     startYear: 1900,
     endYear: 1919,
-    tagline: "Woolworth era — towers reach for the clouds",
+    tagline: "Flatiron, Woolworth — the first towers reshape the horizon",
   },
   {
     id: "art-deco",
     label: "Art Deco",
     startYear: 1920,
     endYear: 1939,
-    tagline: "Chrysler, Empire State — the race to the sky",
+    tagline: "Chrysler, Empire State, 30 Rock — the race to the sky",
   },
   {
-    id: "wartime",
-    label: "Wartime & Recovery",
+    id: "midcentury",
+    label: "Midcentury Modern",
     startYear: 1940,
-    endYear: 1959,
-    tagline: "A pause, then mid-century modernism",
+    endYear: 1969,
+    tagline: "Lever House, Seagram, Pan Am — glass and steel take over",
   },
   {
-    id: "modern",
-    label: "International Style",
-    startYear: 1960,
-    endYear: 1979,
-    tagline: "Seagram, Citicorp — glass and steel",
-  },
-  {
-    id: "corporate",
-    label: "Corporate Towers",
-    startYear: 1980,
-    endYear: 2000,
-    tagline: "Postmodern peaks — Twin Towers crown the century",
+    id: "late-modern",
+    label: "Late Modern",
+    startYear: 1970,
+    endYear: 1999,
+    tagline: "Twin Towers, Citicorp, AT&T — expressionism and postmodern peaks",
   },
   {
     id: "millennium",
-    label: "Millennium & Rebuild",
-    startYear: 2001,
+    label: "New Millennium",
+    startYear: 2000,
     endYear: 2013,
-    tagline: "After 9/11 — downtown rebuilds, Gehry rises downtown",
+    tagline: "Hearst, Gehry, Bank of America — downtown rebuilds after 9/11",
   },
   {
     id: "supertall",
@@ -66,9 +62,26 @@ export function eraForYear(year: number): Era {
   );
 }
 
+export function eraById(id: string | null | undefined): Era | null {
+  if (!id) return null;
+  return SKYLINE_ERAS.find((e) => e.id === id) ?? null;
+}
+
 /** Year to jump to when an era chip is pressed — end of chapter, capped at timeline max. */
 export function eraJumpYear(era: Era, timelineMax: number): number {
   return Math.min(era.endYear, timelineMax);
+}
+
+/** Scrub range when an era filter is active. */
+export function eraScrubBounds(
+  era: Era,
+  timelineMin: number,
+  timelineMax: number,
+): { min: number; max: number } {
+  return {
+    min: Math.max(era.startYear, timelineMin),
+    max: Math.min(era.endYear, timelineMax),
+  };
 }
 
 export function eraProgress(year: number, era: Era): number {

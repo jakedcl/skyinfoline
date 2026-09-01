@@ -7,9 +7,10 @@ import {
   silhouetteAspect,
 } from "@/components/BuildingSilhouette";
 import type { Building } from "@/types/building";
+import type { Era } from "@/lib/eras";
 import {
-  buildingsVisibleAtYear,
-  isVisibleAtYear,
+  buildingsVisibleInSkyline,
+  isSkylineVisible,
   maxHeight,
   sortedByOrder,
 } from "@/lib/buildings";
@@ -30,6 +31,7 @@ type SkylineProps = {
   selectedId: string | null;
   hoveredId: string | null;
   scrubYear: number;
+  eraFilter?: Era | null;
   sortDirection?: SortDirection;
   viewpointLabel?: string;
   newlyBuiltIds?: Set<string>;
@@ -82,6 +84,7 @@ export function Skyline({
   selectedId,
   hoveredId,
   scrubYear,
+  eraFilter = null,
   sortDirection = "desc",
   viewpointLabel = "Manhattan skyline",
   newlyBuiltIds,
@@ -90,8 +93,8 @@ export function Skyline({
 }: SkylineProps) {
   const ordered = sortedByOrder(buildings, sortDirection);
   const visible = useMemo(
-    () => buildingsVisibleAtYear(ordered, scrubYear),
-    [ordered, scrubYear],
+    () => buildingsVisibleInSkyline(ordered, scrubYear, eraFilter),
+    [ordered, scrubYear, eraFilter],
   );
   const visibleCount = visible.length;
   const tallest = maxHeight(visible) || maxHeight(buildings) || 1;
@@ -126,7 +129,7 @@ export function Skyline({
     ro.observe(scroller);
     ro.observe(row);
     return () => ro.disconnect();
-  }, [ordered.length, scrubYear, visibleCount, maxWidthPx]);
+  }, [ordered.length, scrubYear, eraFilter, visibleCount, maxWidthPx]);
 
   const rowHeight = (SKYLINE_MAX_PX + 48 + LABEL_RESERVE_PX) * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
@@ -159,7 +162,7 @@ export function Skyline({
           aria-label={`${viewpointLabel}, towers along Manhattan`}
         >
           {ordered.map((building) => {
-            const built = isVisibleAtYear(building, scrubYear);
+            const built = isSkylineVisible(building, scrubYear, eraFilter);
             const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
             const { heightPx, widthPx } = built
               ? towerSize(

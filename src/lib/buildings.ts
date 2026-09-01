@@ -1,4 +1,5 @@
 import type { Building } from "@/types/building";
+import type { Era } from "@/lib/eras";
 import type { SortDirection } from "@/lib/viewpoints";
 
 export function sortedByOrder(
@@ -55,6 +56,34 @@ export function buildingsVisibleAtYear(
   return buildings.filter((b) => isVisibleAtYear(b, year));
 }
 
+/** True when the tower was completed during this era window. */
+export function buildingCompletedInEra(building: Building, era: Era): boolean {
+  return (
+    building.yearCompleted >= era.startYear &&
+    building.yearCompleted <= era.endYear
+  );
+}
+
+/** Skyline visibility: era filter (completion year) + scrub year (lifespan). */
+export function isSkylineVisible(
+  building: Building,
+  scrubYear: number,
+  eraFilter?: Era | null,
+): boolean {
+  if (eraFilter && !buildingCompletedInEra(building, eraFilter)) {
+    return false;
+  }
+  return isVisibleAtYear(building, scrubYear);
+}
+
+export function buildingsVisibleInSkyline(
+  buildings: Building[],
+  scrubYear: number,
+  eraFilter?: Era | null,
+): Building[] {
+  return buildings.filter((b) => isSkylineVisible(b, scrubYear, eraFilter));
+}
+
 /** @deprecated Use buildingsVisibleAtYear */
 export function buildingsBuiltByYear(
   buildings: Building[],
@@ -77,9 +106,14 @@ export function skylineNeighbors(
   selectedId: string | null,
   scrubYear?: number,
   sortDirection: SortDirection = "desc",
+  eraFilter?: Era | null,
 ): { prevId: string | null; nextId: string | null } {
   const row = sortedByOrder(buildings, sortDirection).filter((b) =>
-    scrubYear == null ? true : isVisibleAtYear(b, scrubYear),
+    scrubYear == null
+      ? eraFilter
+        ? buildingCompletedInEra(b, eraFilter)
+        : true
+      : isSkylineVisible(b, scrubYear, eraFilter),
   );
   const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
   if (index < 0) return { prevId: null, nextId: null };
