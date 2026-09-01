@@ -58,15 +58,12 @@ if (!process.env.SANITY_WRITE_TOKEN) {
   throw new Error("SANITY_WRITE_TOKEN is required to seed buildings.");
 }
 
-function resolveCutoutsDir() {
-  for (const dir of CUTOUT_DIR_CANDIDATES) {
-    if (existsSync(dir)) return dir;
-  }
-  return null;
+function listPngFiles(dir) {
+  return readdirSync(dir).filter((f) => extname(f).toLowerCase() === ".png");
 }
 
 /**
- * Map seed id -> absolute path for each PNG.
+ * Map seed id -> absolute path for each PNG in one folder.
  * Accepts `{id}.png` or descriptive names listed in building-cutouts/filename-map.json.
  */
 function scanLocalCutouts(dir, filenameMap) {
@@ -75,11 +72,7 @@ function scanLocalCutouts(dir, filenameMap) {
 
   if (!dir) return { mapped, unmapped };
 
-  const pngFiles = readdirSync(dir).filter(
-    (f) => extname(f).toLowerCase() === ".png",
-  );
-
-  for (const filename of pngFiles) {
+  for (const filename of listPngFiles(dir)) {
     const slug = basename(filename, ".png");
     const filePath = join(dir, filename);
     const buildingId = buildingIdSet.has(slug)
@@ -93,6 +86,30 @@ function scanLocalCutouts(dir, filenameMap) {
   }
 
   return { mapped, unmapped };
+}
+
+/** Scan every existing cutout folder; earlier candidates win on duplicate ids. */
+function scanAllLocalCutouts(filenameMap) {
+  const mapped = new Map();
+  const unmapped = [];
+  const scannedDirs = [];
+
+  for (const dir of CUTOUT_DIR_CANDIDATES) {
+    if (!existsSync(dir)) continue;
+    scannedDirs.push(dir);
+    const { mapped: dirMapped, unmapped: dirUnmapped } = scanLocalCutouts(
+      dir,
+      filenameMap,
+    );
+    for (const [buildingId, filePath] of dirMapped) {
+      if (!mapped.has(buildingId)) mapped.set(buildingId, filePath);
+    }
+    for (const filename of dirUnmapped) {
+      if (!unmapped.includes(filename)) unmapped.push(filename);
+    }
+  }
+
+  return { mapped, unmapped, scannedDirs };
 }
 
 async function uploadCutout(filePath, filename, buildingName) {
@@ -136,18 +153,18 @@ const legacyDeprecatedIds = [
 ];
 
 const filenameMap = loadFilenameMap();
-const cutoutsDir = resolveCutoutsDir();
-const { mapped: localCutoutPaths, unmapped: unmappedFiles } = scanLocalCutouts(
-  cutoutsDir,
-  filenameMap,
-);
+const {
+  mapped: localCutoutPaths,
+  unmapped: unmappedFiles,
+  scannedDirs,
+} = scanAllLocalCutouts(filenameMap);
 
-if (cutoutsDir) {
-  console.log(`Cutouts folder: ${cutoutsDir}`);
+if (scannedDirs.length) {
+  console.log(`Cutouts folders scanned: ${scannedDirs.join(", ")}`);
   console.log(`Found ${localCutoutPaths.size} PNG(s) mapped to building ids.`);
 } else {
   console.log(
-    "No cutouts folder found. Drop transparent PNGs in building-cutouts/ (see building-cutouts/README.md).",
+    "No cutouts folder found. Drop transparent PNGs in building-cutouts/ or public/building-cutouts/ (see building-cutouts/README.md).",
   );
 }
 
