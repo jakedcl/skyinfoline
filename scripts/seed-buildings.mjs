@@ -19,6 +19,15 @@ const CUTOUT_DIR_CANDIDATES = [
   join(__dirname, "../outputs/building-cutouts"),
 ];
 
+const FILENAME_MAP_PATH = join(__dirname, "../building-cutouts/filename-map.json");
+
+/** Load optional descriptive-filename → building-id map. */
+function loadFilenameMap() {
+  if (!existsSync(FILENAME_MAP_PATH)) return new Map();
+  const raw = JSON.parse(readFileSync(FILENAME_MAP_PATH, "utf8"));
+  return new Map(Object.entries(raw));
+}
+
 // --- Validate local seed data (fail fast on duplicates) ---
 const ids = buildings.map((b) => b.id);
 const names = buildings.map((b) => b.name);
@@ -56,8 +65,11 @@ function resolveCutoutsDir() {
   return null;
 }
 
-/** Map seed id -> absolute path for each PNG whose basename matches a building id. */
-function scanLocalCutouts(dir) {
+/**
+ * Map seed id -> absolute path for each PNG.
+ * Accepts `{id}.png` or descriptive names listed in building-cutouts/filename-map.json.
+ */
+function scanLocalCutouts(dir, filenameMap) {
   const mapped = new Map();
   const unmapped = [];
 
@@ -70,8 +82,11 @@ function scanLocalCutouts(dir) {
   for (const filename of pngFiles) {
     const slug = basename(filename, ".png");
     const filePath = join(dir, filename);
-    if (buildingIdSet.has(slug)) {
-      mapped.set(slug, filePath);
+    const buildingId = buildingIdSet.has(slug)
+      ? slug
+      : filenameMap.get(slug);
+    if (buildingId && buildingIdSet.has(buildingId)) {
+      mapped.set(buildingId, filePath);
     } else {
       unmapped.push(filename);
     }
@@ -120,9 +135,11 @@ const legacyDeprecatedIds = [
   "building-270-park",
 ];
 
+const filenameMap = loadFilenameMap();
 const cutoutsDir = resolveCutoutsDir();
 const { mapped: localCutoutPaths, unmapped: unmappedFiles } = scanLocalCutouts(
   cutoutsDir,
+  filenameMap,
 );
 
 if (cutoutsDir) {
