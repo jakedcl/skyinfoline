@@ -15,7 +15,6 @@ import {
   sortedByOrder,
 } from "@/lib/buildings";
 import type { SortDirection } from "@/lib/viewpoints";
-import { importancePresence } from "@/lib/importance";
 
 const SKYLINE_MAX_PX = 320;
 const BASE_MAX_WIDTH_PX = 48;
@@ -174,7 +173,6 @@ export function Skyline({
               : { heightPx: 0, widthPx: 0 };
             const selected = selectedId === building.id;
             const hovered = hoveredId === building.id;
-            const presence = importancePresence(building.skylineImportance);
             const slotWidth = built ? widthPx + HIT_PAD_X * 2 : 0;
 
             return (
@@ -199,7 +197,7 @@ export function Skyline({
                 style={{
                   width: slotWidth,
                   paddingInline: built ? HIT_PAD_X : 0,
-                  opacity: built ? (selected || hovered ? 1 : presence) : 0,
+                  opacity: built ? 1 : 0,
                   transition,
                 }}
               >
