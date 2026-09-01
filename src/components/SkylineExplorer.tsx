@@ -66,14 +66,12 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
 
   const handleScrubChange = useCallback(
     (year: number) => {
-      if (eraFilter) {
-        const bounds = eraScrubBounds(eraFilter, min, max);
-        setScrubYear(Math.min(bounds.max, Math.max(bounds.min, year)));
-      } else {
-        setScrubYear(year);
+      if (eraFilterId) {
+        setEraFilterId(null);
       }
+      setScrubYear(Math.min(max, Math.max(min, year)));
     },
-    [eraFilter, min, max],
+    [eraFilterId, min, max],
   );
 
   useEffect(() => {
