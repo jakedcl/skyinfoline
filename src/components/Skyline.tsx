@@ -21,6 +21,7 @@ const BASE_MAX_WIDTH_PX = 48;
 const MIN_WIDTH_PX = 16;
 const HIT_PAD_X = 4;
 const GAP_PX = 4;
+const LABEL_RESERVE_PX = 72;
 const SKYLINE_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SKYLINE_TRANSITION_MS = 550;
 
@@ -104,17 +105,17 @@ export function Skyline({
     return () => ro.disconnect();
   }, [ordered.length, scrubYear, visibleCount, maxWidthPx]);
 
-  const rowHeight = (SKYLINE_MAX_PX + 48) * scale;
+  const rowHeight = (SKYLINE_MAX_PX + 48 + LABEL_RESERVE_PX) * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
   const transition = `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`;
 
   return (
     <div
       ref={scrollerRef}
-      className="skyline-scroll relative w-full overflow-x-auto overflow-y-hidden"
+      className="skyline-scroll relative w-full overflow-x-auto"
     >
       <div
-        className="mx-auto overflow-hidden"
+        className="mx-auto overflow-visible"
         style={{
           width: scaledWidth,
           height: rowHeight + 8,
@@ -124,10 +125,10 @@ export function Skyline({
       >
         <div
           ref={rowRef}
-          className="relative flex origin-top-left items-end justify-center pb-0 pt-8"
+          className="relative flex origin-top-left items-end justify-center pb-0 pt-20"
           style={{
             gap: GAP_PX,
-            minHeight: SKYLINE_MAX_PX + 48,
+            minHeight: SKYLINE_MAX_PX + 48 + LABEL_RESERVE_PX,
             transform: `scale(${scale})`,
             width: contentWidth || "max-content",
             transition: `transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
@@ -162,7 +163,7 @@ export function Skyline({
                 onFocus={() => built && onHover(building.id)}
                 onBlur={() => onHover(null)}
                 className={[
-                  "group relative flex shrink-0 flex-col items-center overflow-hidden outline-none",
+                  "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
                   built ? "cursor-pointer" : "pointer-events-none",
                   selected || hovered ? "-translate-y-1.5" : "translate-y-0",
                   justBuilt ? "building-entrance" : "",
@@ -176,12 +177,11 @@ export function Skyline({
               >
                 <span
                   className={[
-                    "pointer-events-none mb-2 max-w-[9rem] truncate text-center text-[10px] tracking-wide uppercase",
+                    "skyline-label",
                     built && (selected || hovered)
                       ? "opacity-100 text-[var(--accent)]"
-                      : "opacity-0 text-[var(--ink-muted)] group-focus-visible:opacity-100",
+                      : "opacity-0 text-[var(--horizon)]/70 group-focus-visible:opacity-100",
                   ].join(" ")}
-                  style={{ transition: `opacity 200ms ${SKYLINE_EASE}` }}
                 >
                   {building.name}
                 </span>
