@@ -226,13 +226,10 @@ body {
 .timeline-era-art-deco {
   background: #b8860b;
 }
-.timeline-era-wartime {
+.timeline-era-midcentury {
   background: #6b7c8c;
 }
-.timeline-era-modern {
-  background: #4a6a82;
-}
-.timeline-era-corporate {
+.timeline-era-late-modern {
   background: #3d5a73;
 }
 .timeline-era-millennium {

@@ -7,10 +7,11 @@ import { Skyline } from "@/components/Skyline";
 import { ViewpointSwitcher } from "@/components/ViewpointSwitcher";
 import {
   findBuilding,
-  isVisibleAtYear,
+  isSkylineVisible,
   skylineNeighbors,
   yearRange,
 } from "@/lib/buildings";
+import { eraById, eraJumpYear, eraScrubBounds } from "@/lib/eras";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
 import type { Building } from "@/types/building";
 
@@ -25,6 +26,9 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [viewpointId, setViewpointId] = useState<ViewpointId>("jersey-city");
   const [prevScrubYear, setPrevScrubYear] = useState(max);
+  const [eraFilterId, setEraFilterId] = useState<string | null>(null);
+
+  const eraFilter = eraById(eraFilterId);
 
   const viewpoint = getViewpoint(viewpointId);
 
@@ -36,8 +40,9 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         selectedId,
         scrubYear,
         viewpoint.sortDirection,
+        eraFilter,
       ),
-    [buildings, selectedId, scrubYear, viewpoint.sortDirection],
+    [buildings, selectedId, scrubYear, viewpoint.sortDirection, eraFilter],
   );
 
   // Track buildings that just completed this scrub year (for entrance flash)
@@ -54,14 +59,22 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   }, [buildings, scrubYear, prevScrubYear]);
 
   useEffect(() => {
-    if (selected && !isVisibleAtYear(selected, scrubYear)) {
+    if (selected && !isSkylineVisible(selected, scrubYear, eraFilter)) {
       setSelectedId(null);
     }
-  }, [scrubYear, selected]);
+  }, [scrubYear, selected, eraFilter]);
 
-  const handleScrubChange = useCallback((year: number) => {
-    setScrubYear(year);
-  }, []);
+  const handleScrubChange = useCallback(
+    (year: number) => {
+      if (eraFilter) {
+        const bounds = eraScrubBounds(eraFilter, min, max);
+        setScrubYear(Math.min(bounds.max, Math.max(bounds.min, year)));
+      } else {
+        setScrubYear(year);
+      }
+    },
+    [eraFilter, min, max],
+  );
 
   useEffect(() => {
     setPrevScrubYear(scrubYear);
@@ -100,6 +113,24 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
     setSelectedId(null);
   };
 
+  const handleEraSelect = (eraId: string | null) => {
+    if (eraId === eraFilterId) {
+      setEraFilterId(null);
+      return;
+    }
+    const era = eraById(eraId);
+    if (!era) return;
+    setEraFilterId(era.id);
+    const jump = eraJumpYear(era, max);
+    const { min: eraMin, max: eraMax } = eraScrubBounds(era, min, max);
+    setScrubYear(Math.min(eraMax, Math.max(eraMin, jump)));
+  };
+
+  const handleJumpToPresent = () => {
+    setEraFilterId(null);
+    setScrubYear(max);
+  };
+
   return (
     <div className="flex w-full flex-col">
       <div className="mb-6">
@@ -122,6 +153,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           selectedId={selectedId}
           hoveredId={hoveredId}
           scrubYear={scrubYear}
+          eraFilter={eraFilter}
           sortDirection={viewpoint.sortDirection}
           viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
           newlyBuiltIds={newlyBuiltIds}
@@ -137,7 +169,10 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           min={min}
           max={max}
           value={scrubYear}
+          eraFilterId={eraFilterId}
           onChange={handleScrubChange}
+          onEraSelect={handleEraSelect}
+          onJumpToPresent={handleJumpToPresent}
         />
       </div>
 

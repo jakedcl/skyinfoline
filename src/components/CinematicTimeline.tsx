@@ -1,13 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { eraForYear, eraJumpYear, eraProgress, SKYLINE_ERAS } from "@/lib/eras";
+import {
+  eraById,
+  eraForYear,
+  eraJumpYear,
+  eraProgress,
+  eraScrubBounds,
+  SKYLINE_ERAS,
+} from "@/lib/eras";
 
 type CinematicTimelineProps = {
   min: number;
   max: number;
   value: number;
+  eraFilterId?: string | null;
   onChange: (year: number) => void;
+  onEraSelect: (eraId: string | null) => void;
+  onJumpToPresent: () => void;
 };
 
 const PLAY_MS_PER_YEAR = 55;
@@ -16,7 +26,10 @@ export function CinematicTimeline({
   min,
   max,
   value,
+  eraFilterId = null,
   onChange,
+  onEraSelect,
+  onJumpToPresent,
 }: CinematicTimelineProps) {
   const [playing, setPlaying] = useState(false);
   const rafRef = useRef<number | null>(null);
@@ -27,8 +40,12 @@ export function CinematicTimeline({
   valueRef.current = value;
   onChangeRef.current = onChange;
 
-  const era = eraForYear(value);
-  const progress = eraProgress(value, era);
+  const eraFilter = eraById(eraFilterId);
+  const scrubBounds = eraFilter
+    ? eraScrubBounds(eraFilter, min, max)
+    : { min, max };
+  const displayEra = eraFilter ?? eraForYear(value);
+  const progress = eraProgress(value, displayEra);
 
   const stopPlayback = useCallback(() => {
     setPlaying(false);
@@ -51,9 +68,9 @@ export function CinematicTimeline({
       if (elapsed >= PLAY_MS_PER_YEAR) {
         const steps = Math.floor(elapsed / PLAY_MS_PER_YEAR);
         lastTickRef.current += steps * PLAY_MS_PER_YEAR;
-        const next = Math.min(max, valueRef.current + steps);
+        const next = Math.min(scrubBounds.max, valueRef.current + steps);
         onChangeRef.current(next);
-        if (next >= max) {
+        if (next >= scrubBounds.max) {
           stopPlayback();
           return;
         }
@@ -65,7 +82,7 @@ export function CinematicTimeline({
     return () => {
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [playing, max, stopPlayback]);
+  }, [playing, scrubBounds.max, stopPlayback]);
 
   useEffect(() => () => stopPlayback(), [stopPlayback]);
 
@@ -75,33 +92,36 @@ export function CinematicTimeline({
 
   const jumpToEra = (era: (typeof SKYLINE_ERAS)[number]) => {
     stopPlayback();
-    onChange(
-      Math.max(min, Math.min(max, eraJumpYear(era, max))),
-    );
+    onEraSelect(era.id);
   };
 
   const jumpToPresent = () => {
     stopPlayback();
-    onChange(max);
+    onJumpToPresent();
   };
 
   const nudge = (delta: number) => {
     stopPlayback();
-    onChange(Math.min(max, Math.max(min, value + delta)));
+    onChange(
+      Math.min(scrubBounds.max, Math.max(scrubBounds.min, value + delta)),
+    );
   };
 
   const togglePlay = () => {
     if (playing) {
       stopPlayback();
-    } else if (value >= max) {
-      onChange(min);
+    } else if (value >= scrubBounds.max) {
+      onChange(scrubBounds.min);
       startPlayback();
     } else {
       startPlayback();
     }
   };
 
-  const trackPct = ((value - min) / (max - min || 1)) * 100;
+  const progressLeft =
+    ((scrubBounds.min - min) / (max - min || 1)) * 100;
+  const progressWidth =
+    ((value - scrubBounds.min) / (max - min || 1)) * 100;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-6">
@@ -109,22 +129,27 @@ export function CinematicTimeline({
       <div className="flex flex-col items-center gap-2 text-center">
         <p
           className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase transition-opacity duration-300"
-          key={era.id}
+          key={displayEra.id}
         >
-          {era.label}
+          {displayEra.label}
+          {eraFilter ? (
+            <span className="ml-2 text-[10px] tracking-[0.2em] text-[var(--ink-muted)] normal-case">
+              · filtered
+            </span>
+          ) : null}
         </p>
         <p className="timeline-year text-6xl font-semibold tabular-nums tracking-tight text-[var(--ink)] md:text-7xl">
           {value}
         </p>
         <p className="max-w-md text-sm leading-relaxed text-[var(--ink-muted)]">
-          {era.tagline}
+          {displayEra.tagline}
         </p>
       </div>
 
       {/* Era chips + jump to present */}
       <div className="flex flex-wrap justify-center gap-2">
         {visibleEras.map((e) => {
-          const active = value >= e.startYear && value <= e.endYear;
+          const filtered = eraFilterId === e.id;
           return (
             <button
               key={e.id}
@@ -132,10 +157,11 @@ export function CinematicTimeline({
               onClick={() => jumpToEra(e)}
               className={[
                 "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
-                active
-                  ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
+                filtered
+                  ? "border-[var(--accent)] bg-[var(--accent)] text-white"
                   : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--steel-bright)] hover:text-[var(--ink-soft)]",
               ].join(" ")}
+              aria-pressed={filtered}
             >
               {e.label}
             </button>
@@ -146,11 +172,11 @@ export function CinematicTimeline({
           onClick={jumpToPresent}
           className={[
             "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
-            value === max
+            !eraFilterId && value === max
               ? "border-[var(--accent)] bg-[var(--accent)] text-white"
               : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
           ].join(" ")}
-          aria-label={`Jump to present (${max})`}
+          aria-label={`Show full skyline at present (${max})`}
         >
           Today · {max}
         </button>
@@ -163,32 +189,36 @@ export function CinematicTimeline({
           aria-hidden
         >
           {visibleEras.map((e) => {
-              const segStart = Math.max(e.startYear, min);
-              const segEnd = Math.min(e.endYear, max);
-              const left =
-                ((segStart - min) / (max - min || 1)) * 100;
-              const width =
-                ((segEnd - segStart) / (max - min || 1)) * 100;
-              return (
-                <span
-                  key={e.id}
-                  className={`timeline-era-seg timeline-era-${e.id} absolute inset-y-0`}
-                  style={{ left: `${left}%`, width: `${width}%` }}
-                />
-              );
-            },
-          )}
+            const segStart = Math.max(e.startYear, min);
+            const segEnd = Math.min(e.endYear, max);
+            const left = ((segStart - min) / (max - min || 1)) * 100;
+            const width = ((segEnd - segStart) / (max - min || 1)) * 100;
+            const highlighted = eraFilterId === e.id;
+            return (
+              <span
+                key={e.id}
+                className={[
+                  `timeline-era-seg timeline-era-${e.id} absolute inset-y-0`,
+                  highlighted ? "opacity-100 ring-1 ring-[var(--accent)]" : "",
+                ].join(" ")}
+                style={{ left: `${left}%`, width: `${width}%` }}
+              />
+            );
+          })}
           <span
             className="timeline-era-progress absolute inset-y-0 left-0 rounded-full bg-[var(--accent)]/35"
-            style={{ width: `${trackPct}%` }}
+            style={{
+              left: `${progressLeft}%`,
+              width: `${progressWidth}%`,
+            }}
           />
         </div>
 
         <input
           id="skyline-year"
           type="range"
-          min={min}
-          max={max}
+          min={scrubBounds.min}
+          max={scrubBounds.max}
           step={1}
           value={value}
           onChange={(e) => {
@@ -200,8 +230,8 @@ export function CinematicTimeline({
             onChange(Number((e.target as HTMLInputElement).value));
           }}
           className="cinematic-range absolute inset-x-0 top-2 w-full"
-          aria-valuemin={min}
-          aria-valuemax={max}
+          aria-valuemin={scrubBounds.min}
+          aria-valuemax={scrubBounds.max}
           aria-valuenow={value}
           aria-label="Scrub skyline through time"
         />
@@ -210,7 +240,7 @@ export function CinematicTimeline({
       {/* Controls */}
       <div className="flex items-center justify-between gap-4">
         <span className="text-[11px] tracking-wider text-[var(--ink-muted)] uppercase tabular-nums">
-          {min}
+          {scrubBounds.min}
         </span>
 
         <div className="flex items-center gap-2">
@@ -259,7 +289,7 @@ export function CinematicTimeline({
         </div>
 
         <span className="text-[11px] tracking-wider text-[var(--ink-muted)] uppercase tabular-nums">
-          {max}
+          {scrubBounds.max}
         </span>
       </div>
 
