@@ -167,14 +167,6 @@ body {
   filter: hue-rotate(-8deg) saturate(1.08);
 }
 
-.view-staten-island {
-  filter: hue-rotate(12deg) saturate(0.95) brightness(1.04);
-}
-
-.view-central-park {
-  filter: hue-rotate(-15deg) saturate(1.12) brightness(0.97);
-}
-
 /* ── Building entrance during timeline play ── */
 @keyframes building-rise {
   0% {

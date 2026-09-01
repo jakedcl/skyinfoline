@@ -1,8 +1,4 @@
-export type ViewpointId =
-  | "jersey-city"
-  | "brooklyn-bridge"
-  | "staten-island"
-  | "central-park";
+export type ViewpointId = "jersey-city" | "brooklyn-bridge";
 
 export type SortDirection = "asc" | "desc";
 
@@ -37,24 +33,6 @@ export const VIEWPOINTS: Viewpoint[] = [
     leftLabel: "South",
     rightLabel: "North",
     atmosphereClass: "view-brooklyn-bridge",
-  },
-  {
-    id: "staten-island",
-    label: "Staten Island Ferry",
-    heading: "looking north",
-    sortDirection: "desc",
-    leftLabel: "West",
-    rightLabel: "East",
-    atmosphereClass: "view-staten-island",
-  },
-  {
-    id: "central-park",
-    label: "Central Park",
-    heading: "looking south",
-    sortDirection: "asc",
-    leftLabel: "West",
-    rightLabel: "East",
-    atmosphereClass: "view-central-park",
   },
 ];
 
