@@ -209,9 +209,6 @@ export function Skyline({
                       : hovered
                         ? "text-[var(--steel-bright)]"
                         : "text-[var(--steel)]",
-                    selected
-                      ? "drop-shadow-[0_0_12px_rgba(232,168,56,0.35)]"
-                      : "",
                   ].join(" ")}
                   style={{
                     height: heightPx,
@@ -236,7 +233,11 @@ export function Skyline({
                       alt=""
                       width={widthPx > 0 ? widthPx * 2 : 96}
                       height={heightPx > 0 ? heightPx * 2 : 128}
-                      className="skyline-cutout block h-full w-full"
+                      className={[
+                        "skyline-cutout block h-full w-full",
+                        selected ? "skyline-cutout--selected" : "",
+                        hovered && !selected ? "skyline-cutout--hovered" : "",
+                      ].join(" ")}
                       style={{ objectFit: "fill" }}
                       unoptimized
                       onLoad={(event) => {
