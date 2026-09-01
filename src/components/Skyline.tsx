@@ -219,9 +219,13 @@ export function Skyline({
                   <span
                     className={[
                       "skyline-label",
+                      built && selected ? "skyline-label--selected" : "",
+                      built && hovered && !selected
+                        ? "skyline-label--hovered"
+                        : "",
                       built && (selected || hovered)
-                        ? "opacity-100 text-[var(--accent)]"
-                        : "opacity-0 text-[var(--horizon)]/70 group-focus-visible:opacity-100",
+                        ? "opacity-100"
+                        : "opacity-0 group-focus-visible:opacity-100",
                     ].join(" ")}
                   >
                     {building.name}
