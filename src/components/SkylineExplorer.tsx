@@ -126,7 +126,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
 
   return (
     <div className="flex w-full flex-col">
-      <nav className="border-b border-white/10 px-4 py-2.5 sm:px-6">
+      <nav className="relative z-20 border-b border-white/10 bg-[var(--sky-top)]/85 px-4 py-2.5 backdrop-blur-sm sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <h1 className="text-base font-semibold tracking-tight text-white sm:text-lg">
             Skyinfoline
@@ -138,32 +138,36 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         </div>
       </nav>
 
-      <div
-        className={[
-          "viewpoint-atmosphere transition-[filter] duration-700",
-          viewpoint.atmosphereClass,
-        ].join(" ")}
-      >
-        <div className="mb-2 flex justify-between px-8 text-[10px] tracking-[0.2em] text-[var(--horizon)]/60 uppercase">
-          <span>← {viewpoint.leftLabel}</span>
-          <span>{viewpoint.rightLabel} →</span>
+      <div className="skyline-hero">
+        <div className="skyline-hero__bg" aria-hidden />
+
+        <div
+          className={[
+            "viewpoint-atmosphere relative z-10 transition-[filter] duration-700",
+            viewpoint.atmosphereClass,
+          ].join(" ")}
+        >
+          <div className="mb-2 flex justify-between px-8 text-[10px] tracking-[0.2em] text-white/70 uppercase drop-shadow-sm">
+            <span>← {viewpoint.leftLabel}</span>
+            <span>{viewpoint.rightLabel} →</span>
+          </div>
+
+          <Skyline
+            buildings={buildings}
+            selectedId={selectedId}
+            hoveredId={hoveredId}
+            scrubYear={scrubYear}
+            eraFilter={eraFilter}
+            sortDirection={viewpoint.sortDirection}
+            viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
+            newlyBuiltIds={newlyBuiltIds}
+            onSelect={setSelectedId}
+            onHover={setHoveredId}
+          />
         </div>
 
-        <Skyline
-          buildings={buildings}
-          selectedId={selectedId}
-          hoveredId={hoveredId}
-          scrubYear={scrubYear}
-          eraFilter={eraFilter}
-          sortDirection={viewpoint.sortDirection}
-          viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
-          newlyBuiltIds={newlyBuiltIds}
-          onSelect={setSelectedId}
-          onHover={setHoveredId}
-        />
+        <div className="water-plane relative z-10 h-10 w-full" aria-hidden />
       </div>
-
-      <div className="water-plane relative h-10 w-full" aria-hidden />
 
       <div className="border-t border-[var(--line)] bg-[var(--panel-deep)]/60 py-10">
         <CinematicTimeline
