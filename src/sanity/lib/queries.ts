@@ -19,6 +19,11 @@ export const BUILDINGS_QUERY = defineQuery(`
     silhouette,
     shortBlurb,
     wikipediaUrl,
-    cutout
+    cutout,
+    "cutoutAspect": select(
+      defined(cutout.asset->metadata.dimensions) =>
+        cutout.asset->metadata.dimensions.width / cutout.asset->metadata.dimensions.height,
+      null
+    )
   }
 `);

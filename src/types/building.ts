@@ -42,6 +42,8 @@ export type Building = {
   skylineImportance?: number;
   /** e.g. "/buildings/empire-state.png" — transparent PNG preferred */
   imageSrc?: string;
+  /** PNG width ÷ height — used so cutouts fill their height slot without letterboxing */
+  cutoutAspect?: number;
   /** Used when imageSrc is missing */
   silhouette?: BuildingSilhouette;
   shortBlurb?: string;
