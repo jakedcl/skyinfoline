@@ -30,9 +30,16 @@ export function yearRange(buildings: Building[]): { min: number; max: number } {
   return { min, max };
 }
 
-/** Dim / hide towers not yet completed at the scrub year */
+/** True when the tower exists at the scrub year */
 export function isBuiltByYear(building: Building, year: number): boolean {
   return building.yearCompleted <= year;
+}
+
+export function buildingsBuiltByYear(
+  buildings: Building[],
+  year: number,
+): Building[] {
+  return buildings.filter((b) => isBuiltByYear(b, year));
 }
 
 export function findBuilding(
