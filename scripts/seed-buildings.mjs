@@ -1,12 +1,23 @@
-import { readFileSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+} from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { basename, dirname, extname, join } from "node:path";
 import { createClient } from "next-sanity";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const buildings = JSON.parse(
   readFileSync(join(__dirname, "../src/data/buildings-seed.json"), "utf8"),
 );
+
+/** Folders checked for transparent PNG cutouts (first match wins). */
+const CUTOUT_DIR_CANDIDATES = [
+  join(__dirname, "../building-cutouts"),
+  join(__dirname, "../public/building-cutouts"),
+  join(__dirname, "../outputs/building-cutouts"),
+];
 
 // --- Validate local seed data (fail fast on duplicates) ---
 const ids = buildings.map((b) => b.id);
@@ -23,6 +34,8 @@ if (dupNames.length) {
 }
 
 const canonicalIds = new Set(ids.map((id) => `building-${id}`));
+const buildingIdSet = new Set(ids);
+const buildingNameById = Object.fromEntries(buildings.map((b) => [b.id, b.name]));
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -34,6 +47,50 @@ const client = createClient({
 
 if (!process.env.SANITY_WRITE_TOKEN) {
   throw new Error("SANITY_WRITE_TOKEN is required to seed buildings.");
+}
+
+function resolveCutoutsDir() {
+  for (const dir of CUTOUT_DIR_CANDIDATES) {
+    if (existsSync(dir)) return dir;
+  }
+  return null;
+}
+
+/** Map seed id -> absolute path for each PNG whose basename matches a building id. */
+function scanLocalCutouts(dir) {
+  const mapped = new Map();
+  const unmapped = [];
+
+  if (!dir) return { mapped, unmapped };
+
+  const pngFiles = readdirSync(dir).filter(
+    (f) => extname(f).toLowerCase() === ".png",
+  );
+
+  for (const filename of pngFiles) {
+    const slug = basename(filename, ".png");
+    const filePath = join(dir, filename);
+    if (buildingIdSet.has(slug)) {
+      mapped.set(slug, filePath);
+    } else {
+      unmapped.push(filename);
+    }
+  }
+
+  return { mapped, unmapped };
+}
+
+async function uploadCutout(filePath, filename, buildingName) {
+  const buffer = readFileSync(filePath);
+  const asset = await client.assets.upload("image", buffer, {
+    filename,
+    contentType: "image/png",
+  });
+  return {
+    _type: "image",
+    asset: { _type: "reference", _ref: asset._id },
+    alt: buildingName,
+  };
 }
 
 /** Known legacy document IDs from earlier seed passes (slug renames, etc.). */
@@ -63,11 +120,44 @@ const legacyDeprecatedIds = [
   "building-270-park",
 ];
 
-// Find any building docs in Sanity that are not in the canonical seed set.
-const existing = await client.fetch(
-  `*[_type == "building"]{ _id, name, "slug": slug.current }`,
+const cutoutsDir = resolveCutoutsDir();
+const { mapped: localCutoutPaths, unmapped: unmappedFiles } = scanLocalCutouts(
+  cutoutsDir,
 );
-const orphanIds = existing
+
+if (cutoutsDir) {
+  console.log(`Cutouts folder: ${cutoutsDir}`);
+  console.log(`Found ${localCutoutPaths.size} PNG(s) mapped to building ids.`);
+} else {
+  console.log(
+    "No cutouts folder found. Drop transparent PNGs in building-cutouts/ (see building-cutouts/README.md).",
+  );
+}
+
+if (unmappedFiles.length) {
+  console.warn(
+    "Unmapped PNG filenames (no matching building id):",
+    unmappedFiles.join(", "),
+  );
+}
+
+const missingCutouts = ids.filter((id) => !localCutoutPaths.has(id));
+if (localCutoutPaths.size > 0 && missingCutouts.length) {
+  console.log(
+    `${missingCutouts.length} building(s) have no local PNG:`,
+    missingCutouts.join(", "),
+  );
+}
+
+// Preserve cutouts already in Sanity when no local PNG replaces them.
+const existingDocs = await client.fetch(
+  `*[_type == "building"]{ _id, cutout, name, "slug": slug.current }`,
+);
+const preservedCutouts = new Map(
+  existingDocs.map((doc) => [doc._id, doc.cutout]),
+);
+
+const orphanIds = existingDocs
   .filter((doc) => !canonicalIds.has(doc._id))
   .map((doc) => doc._id);
 
@@ -77,10 +167,30 @@ if (orphanIds.length) {
   console.log(
     "Removing orphan building documents:",
     orphanIds.map((id) => {
-      const doc = existing.find((d) => d._id === id);
+      const doc = existingDocs.find((d) => d._id === id);
       return `${id} (${doc?.name ?? "?"}, slug: ${doc?.slug ?? "?"})`;
     }),
   );
+}
+
+/** Upload local PNGs and build cutout image objects keyed by building id. */
+const uploadedCutouts = new Map();
+let uploadFailures = 0;
+
+for (const [buildingId, filePath] of localCutoutPaths) {
+  const filename = `${buildingId}.png`;
+  try {
+    const cutout = await uploadCutout(
+      filePath,
+      filename,
+      buildingNameById[buildingId],
+    );
+    uploadedCutouts.set(buildingId, cutout);
+    console.log(`Uploaded cutout: ${filename}`);
+  } catch (error) {
+    uploadFailures += 1;
+    console.error(`Failed to upload ${filename}:`, error);
+  }
 }
 
 const tx = client.transaction();
@@ -89,16 +199,35 @@ for (const id of idsToDelete) {
 }
 for (const b of buildings) {
   const { id, nicknames, ...rest } = b;
-  tx.createOrReplace({
-    _id: `building-${id}`,
+  const docId = `building-${id}`;
+  const cutout =
+    uploadedCutouts.get(id) ?? preservedCutouts.get(docId) ?? undefined;
+
+  const doc = {
+    _id: docId,
     _type: "building",
     ...rest,
     nicknames: nicknames?.length ? nicknames : undefined,
     slug: { _type: "slug", current: id },
-  });
+  };
+  if (cutout) doc.cutout = cutout;
+
+  tx.createOrReplace(doc);
 }
 const result = await tx.commit();
+
+const attachedCount = buildings.filter((b) => {
+  const docId = `building-${b.id}`;
+  return uploadedCutouts.has(b.id) || preservedCutouts.get(docId)?.asset;
+}).length;
+
 console.log(
   `Seeded ${buildings.length} buildings (deleted ${idsToDelete.length} deprecated/orphan docs).`,
   result.transactionId,
 );
+console.log(
+  `Cutouts: ${uploadedCutouts.size} uploaded, ${attachedCount}/${buildings.length} buildings have a cutout attached.`,
+);
+if (uploadFailures) {
+  console.warn(`${uploadFailures} cutout upload(s) failed.`);
+}
