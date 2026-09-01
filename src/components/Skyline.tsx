@@ -43,18 +43,38 @@ function sparseWidthCap(visibleCount: number): number {
   return Math.min(160, BASE_MAX_WIDTH_PX * Math.sqrt(24 / visibleCount));
 }
 
-function buildingWidthPx(
+function towerSize(
   building: Building,
   tallest: number,
   maxWidthPx: number,
-): number {
+  measuredAspect?: number,
+): { heightPx: number; widthPx: number } {
   const heightPx = Math.max(
     28,
     (building.heightFt / tallest) * SKYLINE_MAX_PX,
   );
-  const aspect = silhouetteAspect(building.silhouette ?? "rect");
+
+  const hasCutout = Boolean(building.imageSrc);
+  const aspect =
+    measuredAspect ??
+    building.cutoutAspect ??
+    silhouetteAspect(building.silhouette ?? "rect");
+
   const naturalWidth = heightPx * aspect;
-  return Math.min(maxWidthPx, Math.max(MIN_WIDTH_PX, naturalWidth));
+
+  // PNG cutouts: height is sacred (accurate ft ratio). Width follows image aspect —
+  // never squeeze height via a width cap + object-contain letterboxing.
+  if (hasCutout) {
+    return {
+      heightPx,
+      widthPx: Math.max(MIN_WIDTH_PX, naturalWidth),
+    };
+  }
+
+  return {
+    heightPx,
+    widthPx: Math.min(maxWidthPx, Math.max(MIN_WIDTH_PX, naturalWidth)),
+  };
 }
 
 export function Skyline({
@@ -81,6 +101,9 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
+  const [measuredAspects, setMeasuredAspects] = useState<
+    Record<string, number>
+  >({});
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -138,12 +161,14 @@ export function Skyline({
           {ordered.map((building) => {
             const built = isVisibleAtYear(building, scrubYear);
             const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
-            const heightPx = built
-              ? Math.max(28, (building.heightFt / tallest) * SKYLINE_MAX_PX)
-              : 0;
-            const widthPx = built
-              ? buildingWidthPx(building, tallest, maxWidthPx)
-              : 0;
+            const { heightPx, widthPx } = built
+              ? towerSize(
+                  building,
+                  tallest,
+                  maxWidthPx,
+                  measuredAspects[building.id],
+                )
+              : { heightPx: 0, widthPx: 0 };
             const selected = selectedId === building.id;
             const hovered = hoveredId === building.id;
             const presence = importancePresence(building.skylineImportance);
@@ -177,18 +202,7 @@ export function Skyline({
               >
                 <span
                   className={[
-                    "skyline-label",
-                    built && (selected || hovered)
-                      ? "opacity-100 text-[var(--accent)]"
-                      : "opacity-0 text-[var(--horizon)]/70 group-focus-visible:opacity-100",
-                  ].join(" ")}
-                >
-                  {building.name}
-                </span>
-
-                <span
-                  className={[
-                    "relative block",
+                    "relative block shrink-0",
                     selected
                       ? "text-[var(--accent)]"
                       : hovered
@@ -204,14 +218,36 @@ export function Skyline({
                     transition: `height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, color 300ms, filter 300ms`,
                   }}
                 >
+                  <span
+                    className={[
+                      "skyline-label",
+                      built && (selected || hovered)
+                        ? "opacity-100 text-[var(--accent)]"
+                        : "opacity-0 text-[var(--horizon)]/70 group-focus-visible:opacity-100",
+                    ].join(" ")}
+                  >
+                    {building.name}
+                  </span>
+
                   {building.imageSrc ? (
                     <Image
                       src={building.imageSrc}
                       alt=""
                       width={widthPx > 0 ? widthPx * 2 : 96}
                       height={heightPx > 0 ? heightPx * 2 : 128}
-                      className="h-full w-full object-contain object-bottom"
+                      className="block h-full w-full"
+                      style={{ objectFit: "fill" }}
                       unoptimized
+                      onLoad={(event) => {
+                        const img = event.currentTarget;
+                        if (!img.naturalWidth || !img.naturalHeight) return;
+                        const aspect = img.naturalWidth / img.naturalHeight;
+                        setMeasuredAspects((prev) =>
+                          prev[building.id] === aspect
+                            ? prev
+                            : { ...prev, [building.id]: aspect },
+                        );
+                      }}
                     />
                   ) : (
                     <BuildingSilhouetteShape

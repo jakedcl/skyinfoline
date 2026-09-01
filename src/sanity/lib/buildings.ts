@@ -29,9 +29,14 @@ type SanityBuilding = {
   shortBlurb?: string;
   wikipediaUrl?: string;
   cutout?: {
-    asset?: { _ref: string; _type: string };
+    asset?: {
+      _ref: string;
+      _type: string;
+      metadata?: { dimensions?: { width: number; height: number } };
+    };
     alt?: string;
   };
+  cutoutAspect?: number | null;
 };
 
 function mapBuilding(doc: SanityBuilding): Building {
@@ -57,6 +62,7 @@ function mapBuilding(doc: SanityBuilding): Building {
     shortBlurb: doc.shortBlurb,
     wikipediaUrl: doc.wikipediaUrl,
     imageSrc,
+    cutoutAspect: doc.cutoutAspect ?? undefined,
   };
 }
 

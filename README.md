@@ -25,6 +25,8 @@ The live site reads published buildings from Sanity. No code deploy needed for c
 
 Yes — still supported. Upload a PNG with alpha on `cutout`. The skyline uses a PNG CDN URL so transparency is kept. No image → silhouette fallback.
 
+**Tip:** Crop PNGs tight to the building silhouette (minimal transparent padding above the spire). Extra empty space at the top of the file will push labels away from the visible tower.
+
 ## Local env
 
 Copy `.env.example` → `.env.local`:
