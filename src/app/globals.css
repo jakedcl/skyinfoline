@@ -155,7 +155,7 @@ body {
   position: absolute;
   bottom: calc(100% + 2px);
   left: 50%;
-  z-index: 10;
+  z-index: 2;
   max-width: none;
   white-space: nowrap;
   transform-origin: left bottom;
@@ -220,6 +220,8 @@ body {
 
 /* Drop shadow so cutouts read over the aerial background */
 .skyline-cutout {
+  position: relative;
+  z-index: 1;
   filter:
     drop-shadow(0 1px 2px rgba(10, 14, 20, 0.65))
     drop-shadow(0 6px 16px rgba(10, 14, 20, 0.42))
