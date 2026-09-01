@@ -10,26 +10,9 @@ export default async function Home() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="sky-atmosphere relative overflow-hidden pt-10 pb-2 text-[var(--horizon)] md:pt-14">
-        <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:18px_18px]" />
-
-        <div className="relative z-10 mx-auto max-w-6xl px-6">
-          <p className="animate-brand-in text-xs tracking-[0.35em] text-[var(--accent)] uppercase">
-            Interactive Manhattan skyline
-          </p>
-          <h1 className="animate-brand-in mt-3 text-5xl font-semibold tracking-tight text-white md:text-7xl">
-            Skyinfoline
-          </h1>
-          <p className="animate-brand-in-delay mt-4 max-w-lg text-base leading-relaxed text-[var(--horizon)]/85 md:text-lg">
-            Jersey City or Brooklyn Bridge—same towers, two directions.
-            Scrub through history and click a silhouette to explore.
-          </p>
-        </div>
-
-        <div className="relative z-10 mt-10 md:mt-14">
-          <SkylineExplorer buildings={buildings} />
-        </div>
-      </header>
+      <main className="sky-atmosphere flex flex-1 flex-col">
+        <SkylineExplorer buildings={buildings} />
+      </main>
 
       <footer className="mt-auto border-t border-[var(--line)] bg-[var(--panel)] px-6 py-6 text-sm text-[var(--ink-muted)]">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -58,4 +41,3 @@ export default async function Home() {
     </div>
   );
 }
-
