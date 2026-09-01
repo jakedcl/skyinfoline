@@ -3,7 +3,6 @@
 import {
   eraById,
   eraForYear,
-  eraProgress,
   eraScrubBounds,
   SKYLINE_ERAS,
 } from "@/lib/eras";
@@ -30,7 +29,6 @@ export function CinematicTimeline({
     ? eraScrubBounds(eraFilter, min, max)
     : { min, max };
   const displayEra = eraFilter ?? eraForYear(value);
-  const progress = eraProgress(value, displayEra);
 
   const visibleEras = SKYLINE_ERAS.filter(
     (e) => e.endYear >= min && e.startYear <= max,
@@ -38,12 +36,6 @@ export function CinematicTimeline({
 
   const jumpToEra = (era: (typeof SKYLINE_ERAS)[number]) => {
     onEraSelect(era.id);
-  };
-
-  const nudge = (delta: number) => {
-    onChange(
-      Math.min(scrubBounds.max, Math.max(scrubBounds.min, value + delta)),
-    );
   };
 
   const progressLeft =
@@ -145,45 +137,6 @@ export function CinematicTimeline({
           aria-valuemax={scrubBounds.max}
           aria-valuenow={value}
           aria-label="Scrub skyline through time"
-        />
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-[11px] tracking-wider text-[var(--ink-muted)] uppercase tabular-nums">
-          {scrubBounds.min}
-        </span>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => nudge(-10)}
-            className="border border-[var(--line)] px-2.5 py-1.5 text-xs text-[var(--ink-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            aria-label="Go back 10 years"
-          >
-            −10
-          </button>
-
-          <button
-            type="button"
-            onClick={() => nudge(10)}
-            className="border border-[var(--line)] px-2.5 py-1.5 text-xs text-[var(--ink-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            aria-label="Go forward 10 years"
-          >
-            +10
-          </button>
-        </div>
-
-        <span className="text-[11px] tracking-wider text-[var(--ink-muted)] uppercase tabular-nums">
-          {scrubBounds.max}
-        </span>
-      </div>
-
-      {/* Era progress bar under controls */}
-      <div className="h-0.5 overflow-hidden rounded-full bg-[var(--line)]">
-        <div
-          className="h-full bg-[var(--accent)] transition-[width] duration-150 ease-out"
-          style={{ width: `${progress * 100}%` }}
         />
       </div>
     </div>
