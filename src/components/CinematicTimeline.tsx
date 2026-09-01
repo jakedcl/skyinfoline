@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
   eraById,
   eraForYear,
-  eraJumpYear,
   eraProgress,
   eraScrubBounds,
   SKYLINE_ERAS,
@@ -19,8 +17,6 @@ type CinematicTimelineProps = {
   onEraSelect: (eraId: string | null) => void;
 };
 
-const PLAY_MS_PER_YEAR = 55;
-
 export function CinematicTimeline({
   min,
   max,
@@ -29,15 +25,6 @@ export function CinematicTimeline({
   onChange,
   onEraSelect,
 }: CinematicTimelineProps) {
-  const [playing, setPlaying] = useState(false);
-  const rafRef = useRef<number | null>(null);
-  const lastTickRef = useRef(0);
-  const valueRef = useRef(value);
-  const onChangeRef = useRef(onChange);
-
-  valueRef.current = value;
-  onChangeRef.current = onChange;
-
   const eraFilter = eraById(eraFilterId);
   const scrubBounds = eraFilter
     ? eraScrubBounds(eraFilter, min, max)
@@ -45,70 +32,18 @@ export function CinematicTimeline({
   const displayEra = eraFilter ?? eraForYear(value);
   const progress = eraProgress(value, displayEra);
 
-  const stopPlayback = useCallback(() => {
-    setPlaying(false);
-    if (rafRef.current != null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-  }, []);
-
-  const startPlayback = useCallback(() => {
-    setPlaying(true);
-    lastTickRef.current = performance.now();
-  }, []);
-
-  useEffect(() => {
-    if (!playing) return;
-
-    const tick = (now: number) => {
-      const elapsed = now - lastTickRef.current;
-      if (elapsed >= PLAY_MS_PER_YEAR) {
-        const steps = Math.floor(elapsed / PLAY_MS_PER_YEAR);
-        lastTickRef.current += steps * PLAY_MS_PER_YEAR;
-        const next = Math.min(scrubBounds.max, valueRef.current + steps);
-        onChangeRef.current(next);
-        if (next >= scrubBounds.max) {
-          stopPlayback();
-          return;
-        }
-      }
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [playing, scrubBounds.max, stopPlayback]);
-
-  useEffect(() => () => stopPlayback(), [stopPlayback]);
-
   const visibleEras = SKYLINE_ERAS.filter(
     (e) => e.endYear >= min && e.startYear <= max,
   );
 
   const jumpToEra = (era: (typeof SKYLINE_ERAS)[number]) => {
-    stopPlayback();
     onEraSelect(era.id);
   };
 
   const nudge = (delta: number) => {
-    stopPlayback();
     onChange(
       Math.min(scrubBounds.max, Math.max(scrubBounds.min, value + delta)),
     );
-  };
-
-  const togglePlay = () => {
-    if (playing) {
-      stopPlayback();
-    } else if (value >= scrubBounds.max) {
-      onChange(scrubBounds.min);
-      startPlayback();
-    } else {
-      startPlayback();
-    }
   };
 
   const progressLeft =
@@ -201,14 +136,10 @@ export function CinematicTimeline({
           max={scrubBounds.max}
           step={1}
           value={value}
-          onChange={(e) => {
-            stopPlayback();
-            onChange(Number(e.target.value));
-          }}
-          onInput={(e) => {
-            stopPlayback();
-            onChange(Number((e.target as HTMLInputElement).value));
-          }}
+          onChange={(e) => onChange(Number(e.target.value))}
+          onInput={(e) =>
+            onChange(Number((e.target as HTMLInputElement).value))
+          }
           className="cinematic-range absolute inset-x-0 top-2 w-full"
           aria-valuemin={scrubBounds.min}
           aria-valuemax={scrubBounds.max}
@@ -231,31 +162,6 @@ export function CinematicTimeline({
             aria-label="Go back 10 years"
           >
             −10
-          </button>
-
-          <button
-            type="button"
-            onClick={togglePlay}
-            className={[
-              "flex h-10 min-w-[5.5rem] items-center justify-center gap-2 border px-4 text-xs tracking-wider uppercase transition-colors",
-              playing
-                ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                : "border-[var(--line)] text-[var(--ink-soft)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
-            ].join(" ")}
-            aria-pressed={playing}
-            aria-label={playing ? "Pause timeline" : "Play timeline"}
-          >
-            {playing ? (
-              <>
-                <span className="inline-block h-2.5 w-2.5 bg-current" />
-                Pause
-              </>
-            ) : (
-              <>
-                <span className="inline-block border-y-[5px] border-l-[8px] border-y-transparent border-l-current" />
-                Play
-              </>
-            )}
           </button>
 
           <button
