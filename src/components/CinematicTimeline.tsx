@@ -73,10 +73,14 @@ export function CinematicTimeline({
     (e) => e.endYear >= min && e.startYear <= max,
   );
 
-  const jumpToEra = (era: (typeof SKYLINE_ERAS)[number], isCurrentEra: boolean) => {
+  const jumpToEra = (startYear: number) => {
     stopPlayback();
-    const target = isCurrentEra ? max : era.startYear;
-    onChange(Math.max(min, Math.min(max, target)));
+    onChange(Math.max(min, Math.min(max, startYear)));
+  };
+
+  const jumpToPresent = () => {
+    stopPlayback();
+    onChange(max);
   };
 
   const nudge = (delta: number) => {
@@ -115,28 +119,39 @@ export function CinematicTimeline({
         </p>
       </div>
 
-      {/* Era chips */}
+      {/* Era chips + jump to present */}
       <div className="flex flex-wrap justify-center gap-2">
-        {visibleEras.map((e, index) => {
-            const active = value >= e.startYear && value <= e.endYear;
-            const isCurrentEra = index === visibleEras.length - 1;
-            return (
-              <button
-                key={e.id}
-                type="button"
-                onClick={() => jumpToEra(e, isCurrentEra)}
-                className={[
-                  "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
-                  active
-                    ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
-                    : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--steel-bright)] hover:text-[var(--ink-soft)]",
-                ].join(" ")}
-              >
-                {e.label}
-              </button>
-            );
-          },
-        )}
+        {visibleEras.map((e) => {
+          const active = value >= e.startYear && value <= e.endYear;
+          return (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => jumpToEra(e.startYear)}
+              className={[
+                "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
+                active
+                  ? "border-[var(--accent)] bg-[var(--accent)]/10 text-[var(--accent)]"
+                  : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--steel-bright)] hover:text-[var(--ink-soft)]",
+              ].join(" ")}
+            >
+              {e.label}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={jumpToPresent}
+          className={[
+            "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
+            value === max
+              ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+              : "border-[var(--line)] text-[var(--ink-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]",
+          ].join(" ")}
+          aria-label={`Jump to present (${max})`}
+        >
+          Today · {max}
+        </button>
       </div>
 
       {/* Track with era segments */}
