@@ -69,9 +69,14 @@ export function CinematicTimeline({
 
   useEffect(() => () => stopPlayback(), [stopPlayback]);
 
-  const jumpToEra = (startYear: number) => {
+  const visibleEras = SKYLINE_ERAS.filter(
+    (e) => e.endYear >= min && e.startYear <= max,
+  );
+
+  const jumpToEra = (era: (typeof SKYLINE_ERAS)[number], isCurrentEra: boolean) => {
     stopPlayback();
-    onChange(Math.max(min, Math.min(max, startYear)));
+    const target = isCurrentEra ? max : era.startYear;
+    onChange(Math.max(min, Math.min(max, target)));
   };
 
   const nudge = (delta: number) => {
@@ -112,14 +117,14 @@ export function CinematicTimeline({
 
       {/* Era chips */}
       <div className="flex flex-wrap justify-center gap-2">
-        {SKYLINE_ERAS.filter((e) => e.endYear >= min && e.startYear <= max).map(
-          (e) => {
+        {visibleEras.map((e, index) => {
             const active = value >= e.startYear && value <= e.endYear;
+            const isCurrentEra = index === visibleEras.length - 1;
             return (
               <button
                 key={e.id}
                 type="button"
-                onClick={() => jumpToEra(e.startYear)}
+                onClick={() => jumpToEra(e, isCurrentEra)}
                 className={[
                   "border px-3 py-1 text-[11px] tracking-wider uppercase transition-colors",
                   active
@@ -140,8 +145,7 @@ export function CinematicTimeline({
           className="timeline-era-track relative h-2 overflow-hidden rounded-full"
           aria-hidden
         >
-          {SKYLINE_ERAS.filter((e) => e.endYear >= min && e.startYear <= max).map(
-            (e) => {
+          {visibleEras.map((e) => {
               const segStart = Math.max(e.startYear, min);
               const segEnd = Math.min(e.endYear, max);
               const left =
