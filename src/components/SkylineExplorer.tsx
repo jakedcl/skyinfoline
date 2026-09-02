@@ -175,7 +175,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           />
         </div>
 
-        <div className="water-plane relative z-10 -mt-px h-10 w-full" aria-hidden />
+        <div className="water-plane relative z-10 h-10 w-full" aria-hidden />
       </div>
 
       <div className="border-t border-[var(--line)] bg-[var(--panel-deep)]/60 py-10">
