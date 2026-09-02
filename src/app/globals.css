@@ -110,6 +110,8 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--steel-bright) transparent;
   overflow-y: visible;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .skyline-height-scale__line {
