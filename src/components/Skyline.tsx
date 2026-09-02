@@ -147,7 +147,7 @@ export function Skyline({
         className="relative mx-auto overflow-visible"
         style={{
           width: scaledWidth,
-          height: rowHeight + 8,
+          height: rowHeight,
           maxWidth: "100%",
           transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
         }}
@@ -199,7 +199,7 @@ export function Skyline({
                 onFocus={() => built && onHover(building.id)}
                 onBlur={() => onHover(null)}
                 className={[
-                  "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
+                  "group relative flex shrink-0 flex-col items-center overflow-visible p-0 leading-none outline-none",
                   built ? "cursor-pointer" : "pointer-events-none",
                   selected || hovered ? "-translate-y-1.5 z-20" : "translate-y-0 z-0 group-focus-visible:z-20",
                   justBuilt ? "building-entrance" : "",
@@ -273,10 +273,10 @@ export function Skyline({
                     />
                   )}
 
-                  {selected && built ? (
+                  {built && (selected || hovered) ? (
                     <span
                       aria-hidden
-                      className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
+                      className="pointer-events-none absolute bottom-0 left-1/2 z-[2] h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
                     />
                   ) : null}
                 </span>
