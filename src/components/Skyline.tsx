@@ -273,7 +273,7 @@ export function Skyline({
                     />
                   )}
 
-                  {selected && built ? (
+                  {built && (selected || hovered) ? (
                     <span
                       aria-hidden
                       className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
