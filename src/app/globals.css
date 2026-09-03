@@ -109,7 +109,13 @@ body {
 .skyline-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--steel-bright) transparent;
+  overflow-x: auto;
   overflow-y: visible;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scroll-padding-inline: 28px;
 }
 
 .skyline-height-scale__line {

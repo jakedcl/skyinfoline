@@ -15,17 +15,23 @@ import {
   sortedByOrder,
 } from "@/lib/buildings";
 import {
+  SKYLINE_HOVER_SCALE,
   SKYLINE_MAX_PX,
+  SKYLINE_MOBILE_MAX_WIDTH_PX,
+  SKYLINE_MOBILE_VISIBLE_TOWERS,
   SKYLINE_ROW_HEIGHT_PX,
+  SKYLINE_SCROLL_PAD_PX,
 } from "@/lib/skyline-layout";
 import type { SortDirection } from "@/lib/viewpoints";
 import { SkylineHeightScale } from "@/components/SkylineHeightScale";
+
 const BASE_MAX_WIDTH_PX = 48;
 const MIN_WIDTH_PX = 16;
 const HIT_PAD_X = 4;
 const GAP_PX = 4;
 const SKYLINE_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SKYLINE_TRANSITION_MS = 550;
+const HOVER_LIFT_PX = 6;
 
 type SkylineProps = {
   buildings: Building[];
@@ -117,14 +123,26 @@ export function Skyline({
     if (!scroller || !row) return;
 
     const update = () => {
-      const available = scroller.clientWidth - 24;
+      const available = Math.max(
+        0,
+        scroller.clientWidth - SKYLINE_SCROLL_PAD_PX * 2,
+      );
       const prev = row.style.transform;
       row.style.transform = "none";
       const content = row.scrollWidth;
       row.style.transform = prev;
       if (content <= 0 || available <= 0) return;
       setContentWidth(content);
-      setScale(Math.min(1, available / content));
+
+      const isNarrow = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
+      if (isNarrow && visibleCount > SKYLINE_MOBILE_VISIBLE_TOWERS) {
+        // Close-up: scale as if ~6 towers fill the viewport; overflow scrolls.
+        const closeUpSpan =
+          content * (SKYLINE_MOBILE_VISIBLE_TOWERS / visibleCount);
+        setScale(Math.min(1, available / Math.max(closeUpSpan, 1)));
+      } else {
+        setScale(Math.min(1, available / content));
+      }
     };
 
     update();
@@ -146,143 +164,158 @@ export function Skyline({
       <div
         className="relative mx-auto overflow-visible"
         style={{
-          width: scaledWidth,
+          width: "max-content",
+          minWidth: "100%",
+          paddingInline: SKYLINE_SCROLL_PAD_PX,
           height: rowHeight,
-          maxWidth: "100%",
-          transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
+          transition: `height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
         }}
       >
-        <SkylineHeightScale tallestFt={tallest} scale={scale} />
         <div
-          ref={rowRef}
-          className="relative z-[1] flex origin-top-left items-end justify-center pb-0 pt-20"
+          className="relative mx-auto overflow-visible"
           style={{
-            gap: GAP_PX,
-            minHeight: SKYLINE_ROW_HEIGHT_PX,
-            transform: `scale(${scale})`,
-            width: contentWidth || "max-content",
-            transition: `transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
+            width: scaledWidth ?? "100%",
+            height: rowHeight,
+            transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
           }}
-          aria-label={`${viewpointLabel}, towers along Manhattan`}
         >
-          {ordered.map((building) => {
-            const built = isSkylineVisible(
-              building,
-              scrubYear,
-              eraFilter,
-              skipYearCheck,
-            );
-            const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
-            const { heightPx, widthPx } = built
-              ? towerSize(
-                  building,
-                  tallest,
-                  maxWidthPx,
-                  measuredAspects[building.id],
-                )
-              : { heightPx: 0, widthPx: 0 };
-            const selected = selectedId === building.id;
-            const hovered = hoveredId === building.id;
-            const slotWidth = built ? widthPx + HIT_PAD_X * 2 : 0;
+          <SkylineHeightScale tallestFt={tallest} scale={scale} />
+          <div
+            ref={rowRef}
+            className="relative z-[1] flex origin-top-left items-end justify-center pb-0 pt-20"
+            style={{
+              gap: GAP_PX,
+              minHeight: SKYLINE_ROW_HEIGHT_PX,
+              transform: `scale(${scale})`,
+              width: contentWidth || "max-content",
+              transition: `transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
+            }}
+            aria-label={`${viewpointLabel}, towers along Manhattan`}
+          >
+            {ordered.map((building) => {
+              const built = isSkylineVisible(
+                building,
+                scrubYear,
+                eraFilter,
+                skipYearCheck,
+              );
+              const justBuilt = newlyBuiltIds?.has(building.id) ?? false;
+              const { heightPx, widthPx } = built
+                ? towerSize(
+                    building,
+                    tallest,
+                    maxWidthPx,
+                    measuredAspects[building.id],
+                  )
+                : { heightPx: 0, widthPx: 0 };
+              const selected = selectedId === building.id;
+              const hovered = hoveredId === building.id;
+              const emphasized = selected || hovered;
+              const slotWidth = built ? widthPx + HIT_PAD_X * 2 : 0;
 
-            return (
-              <button
-                key={building.id}
-                type="button"
-                aria-pressed={built ? selected : undefined}
-                aria-hidden={!built}
-                tabIndex={built ? 0 : -1}
-                aria-label={`${building.name}, ${building.heightFt} feet, completed ${building.yearCompleted}`}
-                onClick={() => built && onSelect(building.id)}
-                onMouseEnter={() => built && onHover(building.id)}
-                onMouseLeave={() => onHover(null)}
-                onFocus={() => built && onHover(building.id)}
-                onBlur={() => onHover(null)}
-                className={[
-                  "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
-                  built ? "cursor-pointer" : "pointer-events-none",
-                  selected || hovered ? "-translate-y-1.5 z-20" : "translate-y-0 z-0 group-focus-visible:z-20",
-                  justBuilt ? "building-entrance" : "",
-                ].join(" ")}
-                style={{
-                  width: slotWidth,
-                  paddingInline: built ? HIT_PAD_X : 0,
-                  opacity: built ? 1 : 0,
-                  transition,
-                }}
-              >
-                <span
+              return (
+                <button
+                  key={building.id}
+                  type="button"
+                  aria-pressed={built ? selected : undefined}
+                  aria-hidden={!built}
+                  tabIndex={built ? 0 : -1}
+                  aria-label={`${building.name}, ${building.heightFt} feet, completed ${building.yearCompleted}`}
+                  onClick={() => built && onSelect(building.id)}
+                  onMouseEnter={() => built && onHover(building.id)}
+                  onMouseLeave={() => onHover(null)}
+                  onFocus={() => built && onHover(building.id)}
+                  onBlur={() => onHover(null)}
                   className={[
-                    "relative block shrink-0",
-                    selected
-                      ? "text-[var(--accent)]"
-                      : hovered
-                        ? "text-[var(--steel-bright)]"
-                        : "text-[var(--steel)]",
+                    "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
+                    built ? "cursor-pointer" : "pointer-events-none",
+                    emphasized ? "z-20" : "z-0 group-focus-visible:z-20",
+                    justBuilt ? "building-entrance" : "",
                   ].join(" ")}
                   style={{
-                    height: heightPx,
-                    width: widthPx,
-                    transition: `height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, color 300ms, filter 300ms`,
+                    width: slotWidth,
+                    paddingInline: built ? HIT_PAD_X : 0,
+                    opacity: built ? 1 : 0,
+                    transformOrigin: "bottom center",
+                    transform: emphasized
+                      ? `translateY(-${HOVER_LIFT_PX}px) scale(${SKYLINE_HOVER_SCALE})`
+                      : "translateY(0) scale(1)",
+                    transition,
                   }}
                 >
                   <span
                     className={[
-                      "skyline-label",
-                      built && selected ? "skyline-label--selected" : "",
-                      built && hovered && !selected
-                        ? "skyline-label--hovered"
-                        : "",
-                      built && (selected || hovered)
-                        ? "opacity-100"
-                        : "opacity-0 group-focus-visible:opacity-100",
+                      "relative block shrink-0",
+                      selected
+                        ? "text-[var(--accent)]"
+                        : hovered
+                          ? "text-[var(--steel-bright)]"
+                          : "text-[var(--steel)]",
                     ].join(" ")}
+                    style={{
+                      height: heightPx,
+                      width: widthPx,
+                      transition: `height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, color 300ms, filter 300ms`,
+                    }}
                   >
-                    {building.name}
-                  </span>
-
-                  {building.imageSrc ? (
-                    <Image
-                      src={building.imageSrc}
-                      alt=""
-                      width={widthPx > 0 ? widthPx * 2 : 96}
-                      height={heightPx > 0 ? heightPx * 2 : 128}
-                      className={[
-                        "skyline-cutout block h-full w-full",
-                        selected ? "skyline-cutout--selected" : "",
-                        hovered && !selected ? "skyline-cutout--hovered" : "",
-                      ].join(" ")}
-                      style={{ objectFit: "fill" }}
-                      unoptimized
-                      onLoad={(event) => {
-                        const img = event.currentTarget;
-                        if (!img.naturalWidth || !img.naturalHeight) return;
-                        const aspect = img.naturalWidth / img.naturalHeight;
-                        setMeasuredAspects((prev) =>
-                          prev[building.id] === aspect
-                            ? prev
-                            : { ...prev, [building.id]: aspect },
-                        );
-                      }}
-                    />
-                  ) : (
-                    <BuildingSilhouetteShape
-                      type={building.silhouette ?? "rect"}
-                      className="h-full w-full"
-                      title={building.name}
-                    />
-                  )}
-
-                  {built && (selected || hovered) ? (
                     <span
-                      aria-hidden
-                      className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
-                    />
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
+                      className={[
+                        "skyline-label",
+                        built && selected ? "skyline-label--selected" : "",
+                        built && hovered && !selected
+                          ? "skyline-label--hovered"
+                          : "",
+                        built && (selected || hovered)
+                          ? "opacity-100"
+                          : "opacity-0 group-focus-visible:opacity-100",
+                      ].join(" ")}
+                    >
+                      {building.name}
+                    </span>
+
+                    {building.imageSrc ? (
+                      <Image
+                        src={building.imageSrc}
+                        alt=""
+                        width={widthPx > 0 ? widthPx * 2 : 96}
+                        height={heightPx > 0 ? heightPx * 2 : 128}
+                        className={[
+                          "skyline-cutout block h-full w-full",
+                          selected ? "skyline-cutout--selected" : "",
+                          hovered && !selected ? "skyline-cutout--hovered" : "",
+                        ].join(" ")}
+                        style={{ objectFit: "fill" }}
+                        unoptimized
+                        onLoad={(event) => {
+                          const img = event.currentTarget;
+                          if (!img.naturalWidth || !img.naturalHeight) return;
+                          const aspect = img.naturalWidth / img.naturalHeight;
+                          setMeasuredAspects((prev) =>
+                            prev[building.id] === aspect
+                              ? prev
+                              : { ...prev, [building.id]: aspect },
+                          );
+                        }}
+                      />
+                    ) : (
+                      <BuildingSilhouetteShape
+                        type={building.silhouette ?? "rect"}
+                        className="h-full w-full"
+                        title={building.name}
+                      />
+                    )}
+
+                    {built && (selected || hovered) ? (
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-1 left-1/2 h-0.5 w-3/4 -translate-x-1/2 rounded-full bg-[var(--accent)]"
+                      />
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
