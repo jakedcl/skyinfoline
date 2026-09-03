@@ -3,20 +3,26 @@
 import {
   heightFtToRowY,
   heightScaleTicks,
-  SKYLINE_ROW_HEIGHT_PX,
+  SKYLINE_MAX_PX,
+  skylineRowHeightPx,
 } from "@/lib/skyline-layout";
 
 type SkylineHeightScaleProps = {
   tallestFt: number;
   scale: number;
+  maxPx?: number;
 };
 
 const LABEL_GUTTER = 40;
 
-export function SkylineHeightScale({ tallestFt, scale }: SkylineHeightScaleProps) {
+export function SkylineHeightScale({
+  tallestFt,
+  scale,
+  maxPx = SKYLINE_MAX_PX,
+}: SkylineHeightScaleProps) {
   if (tallestFt <= 0) return null;
 
-  const rowHeight = SKYLINE_ROW_HEIGHT_PX * scale;
+  const rowHeight = skylineRowHeightPx(maxPx) * scale;
   const ticks = heightScaleTicks(tallestFt);
 
   return (
@@ -31,7 +37,7 @@ export function SkylineHeightScale({ tallestFt, scale }: SkylineHeightScaleProps
         height={rowHeight}
       >
         {ticks.map((ft) => {
-          const y = heightFtToRowY(ft, tallestFt, scale);
+          const y = heightFtToRowY(ft, tallestFt, scale, maxPx);
           return (
             <line
               key={ft}
@@ -46,7 +52,7 @@ export function SkylineHeightScale({ tallestFt, scale }: SkylineHeightScaleProps
       </svg>
 
       {ticks.map((ft) => {
-        const y = heightFtToRowY(ft, tallestFt, scale);
+        const y = heightFtToRowY(ft, tallestFt, scale, maxPx);
         const atGround = ft === 0;
         return (
           <span

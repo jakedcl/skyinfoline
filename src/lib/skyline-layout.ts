@@ -12,14 +12,38 @@ export const SKYLINE_SCROLL_PAD_PX = 40;
 /** Hover / selected tower pop — bases stay planted via transform-origin bottom. */
 export const SKYLINE_HOVER_SCALE = 1.1;
 
+/** Mobile tower max: substantial viewport fraction, capped for very tall screens. */
+export const SKYLINE_MOBILE_VH_FRACTION = 0.55;
+export const SKYLINE_MOBILE_MAX_CAP_PX = 520;
+
+export function skylineRowHeightPx(maxPx: number): number {
+  return maxPx + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
+}
+
+/** Desktop stays at SKYLINE_MAX_PX; mobile uses min(55vh, 520), never below desktop. */
+export function skylineMaxPxForViewport(
+  viewportWidthPx: number,
+  viewportHeightPx: number,
+): number {
+  if (viewportWidthPx >= SKYLINE_MOBILE_MAX_WIDTH_PX) return SKYLINE_MAX_PX;
+  return Math.max(
+    SKYLINE_MAX_PX,
+    Math.min(
+      SKYLINE_MOBILE_MAX_CAP_PX,
+      Math.round(viewportHeightPx * SKYLINE_MOBILE_VH_FRACTION),
+    ),
+  );
+}
+
 /** Vertical position from row top; matches `towerSize` height mapping × scale. */
 export function heightFtToRowY(
   heightFt: number,
   tallestFt: number,
   scale = 1,
+  maxPx = SKYLINE_MAX_PX,
 ): number {
-  const heightPx = (heightFt / tallestFt) * SKYLINE_MAX_PX;
-  return (SKYLINE_ROW_HEIGHT_PX - heightPx) * scale;
+  const heightPx = (heightFt / tallestFt) * maxPx;
+  return (skylineRowHeightPx(maxPx) - heightPx) * scale;
 }
 
 /** Pick a round foot interval (~4–6 ticks) for the y-axis. */
