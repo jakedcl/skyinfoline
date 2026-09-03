@@ -44,28 +44,7 @@ export function CinematicTimeline({
     ((value - scrubBounds.min) / (max - min || 1)) * 100;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-6">
-      {/* Era + year display */}
-      <div className="flex flex-col items-center gap-2 text-center">
-        <p
-          className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase transition-opacity duration-300"
-          key={displayEra.id}
-        >
-          {displayEra.label}
-          {eraFilter ? (
-            <span className="ml-2 text-[10px] tracking-[0.2em] text-[var(--ink-muted)] normal-case">
-              · filtered
-            </span>
-          ) : null}
-        </p>
-        <p className="timeline-year text-6xl font-semibold tabular-nums tracking-tight text-[var(--ink)] md:text-7xl">
-          {value}
-        </p>
-        <p className="max-w-md text-sm leading-relaxed text-[var(--ink-muted)]">
-          {displayEra.tagline}
-        </p>
-      </div>
-
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-6">
       {/* Era chips */}
       <div className="flex flex-wrap justify-center gap-2">
         {visibleEras.map((e) => {
@@ -89,55 +68,80 @@ export function CinematicTimeline({
         })}
       </div>
 
-      {/* Track with era segments */}
-      <div className="relative pt-2">
-        <div
-          className="timeline-era-track relative h-2 overflow-hidden rounded-full"
-          aria-hidden
-        >
-          {visibleEras.map((e) => {
-            const segStart = Math.max(e.startYear, min);
-            const segEnd = Math.min(e.endYear, max);
-            const left = ((segStart - min) / (max - min || 1)) * 100;
-            const width = ((segEnd - segStart) / (max - min || 1)) * 100;
-            const highlighted = eraFilterId === e.id;
-            return (
-              <span
-                key={e.id}
-                className={[
-                  `timeline-era-seg timeline-era-${e.id} absolute inset-y-0`,
-                  highlighted ? "opacity-100 ring-1 ring-[var(--accent)]" : "",
-                ].join(" ")}
-                style={{ left: `${left}%`, width: `${width}%` }}
-              />
-            );
-          })}
-          <span
-            className="timeline-era-progress absolute inset-y-0 left-0 rounded-full bg-[var(--accent)]/35"
-            style={{
-              left: `${progressLeft}%`,
-              width: `${progressWidth}%`,
-            }}
+      <p className="text-center text-xs leading-relaxed text-[var(--ink-muted)]">
+        {displayEra.tagline}
+      </p>
+
+      {/* Slider + year / era on the right */}
+      <div className="flex items-center gap-4 sm:gap-5">
+        <div className="relative min-w-0 flex-1 pt-1">
+          <div
+            className="timeline-era-track relative h-2 overflow-hidden rounded-full"
+            aria-hidden
+          >
+            {visibleEras.map((e) => {
+              const segStart = Math.max(e.startYear, min);
+              const segEnd = Math.min(e.endYear, max);
+              const left = ((segStart - min) / (max - min || 1)) * 100;
+              const width = ((segEnd - segStart) / (max - min || 1)) * 100;
+              const highlighted = eraFilterId === e.id;
+              return (
+                <span
+                  key={e.id}
+                  className={[
+                    `timeline-era-seg timeline-era-${e.id} absolute inset-y-0`,
+                    highlighted
+                      ? "opacity-100 ring-1 ring-[var(--accent)]"
+                      : "",
+                  ].join(" ")}
+                  style={{ left: `${left}%`, width: `${width}%` }}
+                />
+              );
+            })}
+            <span
+              className="timeline-era-progress absolute inset-y-0 left-0 rounded-full bg-[var(--accent)]/35"
+              style={{
+                left: `${progressLeft}%`,
+                width: `${progressWidth}%`,
+              }}
+            />
+          </div>
+
+          <input
+            id="skyline-year"
+            type="range"
+            min={scrubBounds.min}
+            max={scrubBounds.max}
+            step={1}
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value))}
+            onInput={(e) =>
+              onChange(Number((e.target as HTMLInputElement).value))
+            }
+            className="cinematic-range absolute inset-x-0 top-1 w-full"
+            aria-valuemin={scrubBounds.min}
+            aria-valuemax={scrubBounds.max}
+            aria-valuenow={value}
+            aria-label="Scrub skyline through time"
           />
         </div>
 
-        <input
-          id="skyline-year"
-          type="range"
-          min={scrubBounds.min}
-          max={scrubBounds.max}
-          step={1}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          onInput={(e) =>
-            onChange(Number((e.target as HTMLInputElement).value))
-          }
-          className="cinematic-range absolute inset-x-0 top-2 w-full"
-          aria-valuemin={scrubBounds.min}
-          aria-valuemax={scrubBounds.max}
-          aria-valuenow={value}
-          aria-label="Scrub skyline through time"
-        />
+        <div
+          className="shrink-0 text-right leading-tight"
+          key={displayEra.id}
+        >
+          <p className="text-[10px] tracking-[0.22em] text-[var(--accent)] uppercase sm:text-xs">
+            {displayEra.label}
+            {eraFilter ? (
+              <span className="ml-1.5 text-[9px] tracking-[0.16em] text-[var(--ink-muted)] normal-case">
+                · filtered
+              </span>
+            ) : null}
+          </p>
+          <p className="timeline-year text-2xl font-semibold tabular-nums tracking-tight text-[var(--ink)] sm:text-3xl">
+            {value}
+          </p>
+        </div>
       </div>
     </div>
   );
