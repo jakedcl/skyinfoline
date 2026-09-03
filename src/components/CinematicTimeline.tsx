@@ -68,11 +68,23 @@ export function CinematicTimeline({
         })}
       </div>
 
-      <p className="text-center text-xs leading-relaxed text-[var(--ink-muted)]">
+      <p
+        className="text-center text-xs leading-relaxed text-[var(--ink-muted)]"
+        key={displayEra.id}
+      >
+        <span className="tracking-[0.18em] text-[var(--accent)] uppercase">
+          {displayEra.label}
+        </span>
+        {eraFilter ? (
+          <span className="ml-1.5 text-[9px] tracking-[0.16em] text-[var(--ink-muted)] normal-case">
+            · filtered
+          </span>
+        ) : null}
+        <span aria-hidden> — </span>
         {displayEra.tagline}
       </p>
 
-      {/* Slider + year / era on the right */}
+      {/* Slider + fixed-width year on the right */}
       <div className="flex items-center gap-4 sm:gap-5">
         <div className="relative min-w-0 flex-1 pt-1">
           <div
@@ -126,22 +138,9 @@ export function CinematicTimeline({
           />
         </div>
 
-        <div
-          className="shrink-0 text-right leading-tight"
-          key={displayEra.id}
-        >
-          <p className="text-[10px] tracking-[0.22em] text-[var(--accent)] uppercase sm:text-xs">
-            {displayEra.label}
-            {eraFilter ? (
-              <span className="ml-1.5 text-[9px] tracking-[0.16em] text-[var(--ink-muted)] normal-case">
-                · filtered
-              </span>
-            ) : null}
-          </p>
-          <p className="timeline-year text-2xl font-semibold tabular-nums tracking-tight text-[var(--ink)] sm:text-3xl">
-            {value}
-          </p>
-        </div>
+        <p className="timeline-year w-[4.5ch] shrink-0 text-right text-2xl font-semibold tabular-nums tracking-tight text-[var(--ink)] sm:text-3xl">
+          {value}
+        </p>
       </div>
     </div>
   );
