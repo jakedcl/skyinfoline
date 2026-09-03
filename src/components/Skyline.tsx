@@ -17,8 +17,6 @@ import {
 import {
   SKYLINE_HOVER_SCALE,
   SKYLINE_MAX_PX,
-  SKYLINE_MOBILE_MAX_WIDTH_PX,
-  SKYLINE_MOBILE_VISIBLE_TOWERS,
   SKYLINE_ROW_HEIGHT_PX,
   SKYLINE_SCROLL_PAD_PX,
 } from "@/lib/skyline-layout";
@@ -134,15 +132,8 @@ export function Skyline({
       if (content <= 0 || available <= 0) return;
       setContentWidth(content);
 
-      const isNarrow = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
-      if (isNarrow && visibleCount > SKYLINE_MOBILE_VISIBLE_TOWERS) {
-        // Close-up: scale as if ~6 towers fill the viewport; overflow scrolls.
-        const closeUpSpan =
-          content * (SKYLINE_MOBILE_VISIBLE_TOWERS / visibleCount);
-        setScale(Math.min(1, available / Math.max(closeUpSpan, 1)));
-      } else {
-        setScale(Math.min(1, available / content));
-      }
+      // Fit the visible set in the viewport when possible; otherwise scroll.
+      setScale(Math.min(1, available / content));
     };
 
     update();

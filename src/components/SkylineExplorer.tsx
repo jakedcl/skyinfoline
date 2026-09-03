@@ -12,12 +12,28 @@ import {
   yearRange,
 } from "@/lib/buildings";
 import { eraById, eraJumpYear, eraScrubBounds } from "@/lib/eras";
+import { isIconicLandingId } from "@/lib/iconic";
+import { SKYLINE_MOBILE_MAX_WIDTH_PX } from "@/lib/skyline-layout";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
 import type { Building } from "@/types/building";
 
 type SkylineExplorerProps = {
   buildings: Building[];
 };
+
+function useIsMobile(breakpointPx = SKYLINE_MOBILE_MAX_WIDTH_PX): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpointPx - 1}px)`);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, [breakpointPx]);
+
+  return isMobile;
+}
 
 export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const { min, max } = useMemo(() => yearRange(buildings), [buildings]);
@@ -28,9 +44,20 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [prevScrubYear, setPrevScrubYear] = useState(max);
   const [eraFilterId, setEraFilterId] = useState<string | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const isMobile = useIsMobile();
 
   const eraFilter = eraById(eraFilterId);
   const skipYearCheck = !hasInteracted;
+  /** Mobile first paint: curated iconic set only (not a crop of the full row). */
+  const iconicLanding = isMobile && !hasInteracted;
+
+  const skylineBuildings = useMemo(
+    () =>
+      iconicLanding
+        ? buildings.filter((b) => isIconicLandingId(b.id))
+        : buildings,
+    [buildings, iconicLanding],
+  );
 
   const viewpoint = getViewpoint(viewpointId);
 
@@ -38,14 +65,21 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const { prevId, nextId } = useMemo(
     () =>
       skylineNeighbors(
-        buildings,
+        skylineBuildings,
         selectedId,
         scrubYear,
         viewpoint.sortDirection,
         eraFilter,
         skipYearCheck,
       ),
-    [buildings, selectedId, scrubYear, viewpoint.sortDirection, eraFilter, skipYearCheck],
+    [
+      skylineBuildings,
+      selectedId,
+      scrubYear,
+      viewpoint.sortDirection,
+      eraFilter,
+      skipYearCheck,
+    ],
   );
 
   // Track buildings that just completed this scrub year (for entrance flash)
@@ -67,8 +101,12 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       !isSkylineVisible(selected, scrubYear, eraFilter, skipYearCheck)
     ) {
       setSelectedId(null);
+      return;
     }
-  }, [scrubYear, selected, eraFilter, skipYearCheck]);
+    if (selected && iconicLanding && !isIconicLandingId(selected.id)) {
+      setSelectedId(null);
+    }
+  }, [scrubYear, selected, eraFilter, skipYearCheck, iconicLanding]);
 
   const handleScrubChange = useCallback(
     (year: number) => {
@@ -161,7 +199,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           </div>
 
           <Skyline
-            buildings={buildings}
+            buildings={skylineBuildings}
             selectedId={selectedId}
             hoveredId={hoveredId}
             scrubYear={scrubYear}
