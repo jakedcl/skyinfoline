@@ -84,8 +84,12 @@ export function CinematicTimeline({
         {displayEra.tagline}
       </p>
 
-      {/* Slider + fixed-width year on the right */}
+      {/* Fixed-width year on the left + slider */}
       <div className="flex items-center gap-4 sm:gap-5">
+        <p className="timeline-year w-[4.5ch] shrink-0 text-left text-2xl font-semibold tabular-nums tracking-tight text-[var(--ink)] sm:text-3xl">
+          {value}
+        </p>
+
         <div className="relative min-w-0 flex-1 pt-1">
           <div
             className="timeline-era-track relative h-2 overflow-hidden rounded-full"
@@ -137,10 +141,6 @@ export function CinematicTimeline({
             aria-label="Scrub skyline through time"
           />
         </div>
-
-        <p className="timeline-year w-[4.5ch] shrink-0 text-right text-2xl font-semibold tabular-nums tracking-tight text-[var(--ink)] sm:text-3xl">
-          {value}
-        </p>
       </div>
     </div>
   );
