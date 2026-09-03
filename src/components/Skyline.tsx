@@ -17,8 +17,10 @@ import {
 import {
   SKYLINE_HOVER_SCALE,
   SKYLINE_MAX_PX,
-  SKYLINE_ROW_HEIGHT_PX,
+  SKYLINE_MOBILE_MAX_WIDTH_PX,
   SKYLINE_SCROLL_PAD_PX,
+  skylineMaxPxForViewport,
+  skylineRowHeightPx,
 } from "@/lib/skyline-layout";
 import type { SortDirection } from "@/lib/viewpoints";
 import { SkylineHeightScale } from "@/components/SkylineHeightScale";
@@ -55,11 +57,12 @@ function towerSize(
   building: Building,
   tallest: number,
   maxWidthPx: number,
+  skylineMaxPx: number,
   measuredAspect?: number,
 ): { heightPx: number; widthPx: number } {
   const heightPx = Math.max(
     28,
-    (building.heightFt / tallest) * SKYLINE_MAX_PX,
+    (building.heightFt / tallest) * skylineMaxPx,
   );
 
   const hasCutout = Boolean(building.imageSrc);
@@ -111,9 +114,21 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
+  const [skylineMaxPx, setSkylineMaxPx] = useState(SKYLINE_MAX_PX);
   const [measuredAspects, setMeasuredAspects] = useState<
     Record<string, number>
   >({});
+
+  useLayoutEffect(() => {
+    const syncMax = () => {
+      setSkylineMaxPx(
+        skylineMaxPxForViewport(window.innerWidth, window.innerHeight),
+      );
+    };
+    syncMax();
+    window.addEventListener("resize", syncMax);
+    return () => window.removeEventListener("resize", syncMax);
+  }, []);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -132,8 +147,13 @@ export function Skyline({
       if (content <= 0 || available <= 0) return;
       setContentWidth(content);
 
-      // Fit the visible set in the viewport when possible; otherwise scroll.
-      setScale(Math.min(1, available / content));
+      const isMobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
+      // Mobile: keep full tower height and scroll horizontally — don't shrink.
+      if (isMobile) {
+        setScale(1);
+      } else {
+        setScale(Math.min(1, available / content));
+      }
     };
 
     update();
@@ -141,9 +161,18 @@ export function Skyline({
     ro.observe(scroller);
     ro.observe(row);
     return () => ro.disconnect();
-  }, [ordered.length, scrubYear, eraFilter, skipYearCheck, visibleCount, maxWidthPx]);
+  }, [
+    ordered.length,
+    scrubYear,
+    eraFilter,
+    skipYearCheck,
+    visibleCount,
+    maxWidthPx,
+    skylineMaxPx,
+  ]);
 
-  const rowHeight = SKYLINE_ROW_HEIGHT_PX * scale;
+  const rowHeightPx = skylineRowHeightPx(skylineMaxPx);
+  const rowHeight = rowHeightPx * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
   const transition = `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`;
 
@@ -170,13 +199,17 @@ export function Skyline({
             transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
           }}
         >
-          <SkylineHeightScale tallestFt={tallest} scale={scale} />
+          <SkylineHeightScale
+            tallestFt={tallest}
+            scale={scale}
+            maxPx={skylineMaxPx}
+          />
           <div
             ref={rowRef}
             className="relative z-[1] flex origin-top-left items-end justify-center pb-0 pt-20"
             style={{
               gap: GAP_PX,
-              minHeight: SKYLINE_ROW_HEIGHT_PX,
+              minHeight: rowHeightPx,
               transform: `scale(${scale})`,
               width: contentWidth || "max-content",
               transition: `transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
@@ -196,6 +229,7 @@ export function Skyline({
                     building,
                     tallest,
                     maxWidthPx,
+                    skylineMaxPx,
                     measuredAspects[building.id],
                   )
                 : { heightPx: 0, widthPx: 0 };
