@@ -603,9 +603,6 @@ body {
   /* Fixed 2-line plate — era switches must not bounce the rail/dock */
   height: calc(20px + 2.9em);
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .operator-readout__title {
