@@ -198,7 +198,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             viewpoint.atmosphereClass,
           ].join(" ")}
         >
-          <div className="mb-2 flex justify-between px-8 text-[10px] tracking-[0.2em] text-white/70 uppercase drop-shadow-sm">
+          <div className="mb-1 flex justify-between px-4 text-[10px] tracking-[0.2em] text-white/70 uppercase drop-shadow-sm sm:mb-2 sm:px-8">
             <span>← {viewpoint.leftLabel}</span>
             <span>{viewpoint.rightLabel} →</span>
           </div>

@@ -19,7 +19,9 @@ import {
   SKYLINE_MAX_PX,
   SKYLINE_MOBILE_MAX_WIDTH_PX,
   SKYLINE_SCROLL_PAD_PX,
+  skylineFitScale,
   skylineMaxPxForViewport,
+  skylinePadTopPx,
   skylineRowHeightPx,
 } from "@/lib/skyline-layout";
 import type { SortDirection } from "@/lib/viewpoints";
@@ -114,8 +116,14 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
-  const [skylineMaxPx, setSkylineMaxPx] = useState(SKYLINE_MAX_PX);
-  const [isNarrow, setIsNarrow] = useState(false);
+  const [skylineMaxPx, setSkylineMaxPx] = useState(() => {
+    if (typeof window === "undefined") return SKYLINE_MAX_PX;
+    return skylineMaxPxForViewport(window.innerWidth, window.innerHeight);
+  });
+  const [isNarrow, setIsNarrow] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
+  });
   const [measuredAspects, setMeasuredAspects] = useState<
     Record<string, number>
   >({});
@@ -156,12 +164,8 @@ export function Skyline({
 
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
-      // Mobile: keep full tower height and scroll horizontally — don't shrink.
-      if (mobile) {
-        setScale(1);
-      } else {
-        setScale(Math.min(1, available / content));
-      }
+      // Fit iconic / modest sets to width; dense eras keep full height + scroll.
+      setScale(skylineFitScale(available, content, mobile));
     };
 
     update();
@@ -179,9 +183,10 @@ export function Skyline({
     skylineMaxPx,
   ]);
 
-  const rowHeightPx = skylineRowHeightPx(skylineMaxPx);
+  const rowHeightPx = skylineRowHeightPx(skylineMaxPx, { narrow: isNarrow });
   const rowHeight = rowHeightPx * scale;
   const scaledWidth = contentWidth > 0 ? contentWidth * scale : undefined;
+  const padTopPx = skylinePadTopPx(isNarrow);
   const transition = `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`;
 
   return (
@@ -211,17 +216,19 @@ export function Skyline({
             tallestFt={tallest}
             scale={scale}
             maxPx={skylineMaxPx}
+            narrow={isNarrow}
           />
           <div
             ref={rowRef}
             className={[
-              "relative z-[1] flex origin-top-left items-end pb-0 pt-20",
-              // Mobile scrolls at full tower size — start at the first tower so
+              "relative z-[1] flex origin-top-left items-end pb-0",
+              // When scrolling at full size, start at the first tower so
               // scrollLeft 0 is never empty padding from justify-center.
               isNarrow || scale < 1 ? "justify-start" : "justify-center",
             ].join(" ")}
             style={{
               gap: GAP_PX,
+              paddingTop: padTopPx,
               minHeight: rowHeightPx,
               transform: `scale(${scale})`,
               width: contentWidth || "max-content",
