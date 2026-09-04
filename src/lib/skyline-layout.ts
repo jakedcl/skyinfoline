@@ -44,10 +44,10 @@ export const SKYLINE_MOBILE_DENSE_MIN_MAX_PX = 140;
  */
 export const SKYLINE_MOBILE_DENSE_COUNT_SPAN = 24;
 /**
- * Last-resort min fit scale on mobile after maxPx density shrink.
- * Below this, keep the floor and allow gentle horizontal scroll.
+ * Always shrink to fit the full visible set — never clamp with a min scale that
+ * leaves towers clipped behind overflow:hidden.
  */
-export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.35;
+export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0;
 
 export type SkylineRowOpts = {
   /** Narrow viewport — use compact label/extra reserve. */
@@ -136,24 +136,17 @@ export type SkylineFitScaleOpts = {
 
 /**
  * Fit scale for the measured content width.
- * Mobile / forceFit: always shrink to width. If the scale would fall below
- * SKYLINE_MOBILE_MIN_FIT_SCALE after density maxPx shrink, clamp to that floor
- * and let the scroller allow gentle overflow as a last resort.
+ * Always shrink so every visible tower fits the viewport width — no min-scale
+ * floor that clips the right edge behind overflow:hidden.
  */
 export function skylineFitScale(
   availablePx: number,
   contentPx: number,
-  narrow: boolean,
-  opts: SkylineFitScaleOpts = {},
+  _narrow: boolean,
+  _opts: SkylineFitScaleOpts = {},
 ): number {
   if (contentPx <= 0 || availablePx <= 0) return 1;
-  const fit = Math.min(1, availablePx / contentPx);
-  const forceFit = Boolean(opts.forceFit) || narrow;
-  if (!forceFit) return fit;
-  if (narrow && fit < SKYLINE_MOBILE_MIN_FIT_SCALE) {
-    return SKYLINE_MOBILE_MIN_FIT_SCALE;
-  }
-  return fit;
+  return Math.min(1, availablePx / contentPx);
 }
 
 /** Vertical position from row top; matches `towerSize` height mapping × scale. */
