@@ -45,14 +45,6 @@ export function CinematicTimeline({
 
   return (
     <div className="operator-deck__plate mx-auto w-full max-w-5xl px-4 py-4 sm:px-5 sm:py-5">
-      <div className="operator-deck__header">
-        <p className="operator-deck__eyebrow">Skyline operator · circuit bank</p>
-        <p className="operator-deck__status">
-          <span className="operator-deck__lamp" aria-hidden />
-          Live feed
-        </p>
-      </div>
-
       {/* Era breakers */}
       <div
         className="flex flex-wrap gap-2 sm:gap-2.5"
