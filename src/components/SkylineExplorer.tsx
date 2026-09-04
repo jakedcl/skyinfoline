@@ -20,15 +20,15 @@ type SkylineExplorerProps = {
   buildings: Building[];
 };
 
-/** Conservative SSR/first-paint width so landing starts sparse, then widens. */
+/**
+ * SSR + first client paint must share one width so landing N / tower text match.
+ * Real viewport is applied only after mount (useEffect) — never in useState init.
+ */
 const LANDING_SSR_WIDTH_PX = 390;
 
-/** Track viewport width for dynamic landing density (avoids a full-set flash). */
+/** Viewport width for landing density; hydrated value only after mount. */
 function useViewportWidth(): number {
-  const [width, setWidth] = useState(() => {
-    if (typeof window === "undefined") return LANDING_SSR_WIDTH_PX;
-    return window.innerWidth;
-  });
+  const [width, setWidth] = useState(LANDING_SSR_WIDTH_PX);
 
   useEffect(() => {
     const sync = () => setWidth(window.innerWidth);

@@ -116,15 +116,11 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
+  /** SSR-safe: assume fits → justify-center; flip to start after measure if scroll needed. */
   const [fitsViewport, setFitsViewport] = useState(true);
-  const [skylineMaxPx, setSkylineMaxPx] = useState(() => {
-    if (typeof window === "undefined") return SKYLINE_MAX_PX;
-    return skylineMaxPxForViewport(window.innerWidth, window.innerHeight);
-  });
-  const [isNarrow, setIsNarrow] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
-  });
+  /** Desktop defaults for SSR/first paint; real viewport applied in layout effect. */
+  const [skylineMaxPx, setSkylineMaxPx] = useState(SKYLINE_MAX_PX);
+  const [isNarrow, setIsNarrow] = useState(false);
   const [measuredAspects, setMeasuredAspects] = useState<
     Record<string, number>
   >({});
