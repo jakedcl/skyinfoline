@@ -42,7 +42,7 @@ type SkylineProps = {
   selectedId: string | null;
   hoveredId: string | null;
   scrubYear: number;
-  eraFilter?: Era | null;
+  eraFilters?: Era | Era[] | null;
   skipYearCheck?: boolean;
   sortDirection?: SortDirection;
   viewpointLabel?: string;
@@ -103,7 +103,7 @@ export function Skyline({
   selectedId,
   hoveredId,
   scrubYear,
-  eraFilter = null,
+  eraFilters = null,
   skipYearCheck = false,
   sortDirection = "desc",
   viewpointLabel = "Manhattan skyline",
@@ -114,8 +114,8 @@ export function Skyline({
 }: SkylineProps) {
   const ordered = sortedByOrder(buildings, sortDirection);
   const visible = useMemo(
-    () => buildingsVisibleInSkyline(ordered, scrubYear, eraFilter, skipYearCheck),
-    [ordered, scrubYear, eraFilter, skipYearCheck],
+    () => buildingsVisibleInSkyline(ordered, scrubYear, eraFilters, skipYearCheck),
+    [ordered, scrubYear, eraFilters, skipYearCheck],
   );
   const visibleCount = visible.length;
   const tallest = maxHeight(visible) || maxHeight(buildings) || 1;
@@ -191,7 +191,7 @@ export function Skyline({
   }, [
     ordered.length,
     scrubYear,
-    eraFilter,
+    eraFilters,
     skipYearCheck,
     visibleCount,
     maxWidthPx,
@@ -264,7 +264,7 @@ export function Skyline({
               const built = isSkylineVisible(
                 building,
                 scrubYear,
-                eraFilter,
+                eraFilters,
                 skipYearCheck,
               );
               const justBuilt = newlyBuiltIds?.has(building.id) ?? false;

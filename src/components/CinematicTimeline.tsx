@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  eraById,
   eraForYear,
   eraScrubBounds,
+  erasByIds,
   SKYLINE_ERAS,
 } from "@/lib/eras";
 
@@ -11,32 +11,36 @@ type CinematicTimelineProps = {
   min: number;
   max: number;
   value: number;
-  eraFilterId?: string | null;
+  eraFilterIds?: string[];
   onChange: (year: number) => void;
-  onEraSelect: (eraId: string | null) => void;
+  onEraSelect: (eraId: string) => void;
 };
 
 export function CinematicTimeline({
   min,
   max,
   value,
-  eraFilterId = null,
+  eraFilterIds = [],
   onChange,
   onEraSelect,
 }: CinematicTimelineProps) {
-  const eraFilter = eraById(eraFilterId);
-  const scrubBounds = eraFilter
-    ? eraScrubBounds(eraFilter, min, max)
-    : { min, max };
-  const displayEra = eraFilter ?? eraForYear(value);
+  const eraFilters = erasByIds(eraFilterIds);
+  const scrubBounds =
+    eraFilters.length > 0
+      ? eraScrubBounds(eraFilters, min, max)
+      : { min, max };
+  const displayEra =
+    eraFilters.length === 1 ? eraFilters[0] : eraForYear(value);
+  const filterTitle =
+    eraFilters.length === 0
+      ? null
+      : eraFilters.length === 1
+        ? eraFilters[0].label
+        : eraFilters.map((e) => e.label).join(" + ");
 
   const visibleEras = SKYLINE_ERAS.filter(
     (e) => e.endYear >= min && e.startYear <= max,
   );
-
-  const jumpToEra = (era: (typeof SKYLINE_ERAS)[number]) => {
-    onEraSelect(era.id);
-  };
 
   const progressLeft =
     ((scrubBounds.min - min) / (max - min || 1)) * 100;
@@ -45,19 +49,19 @@ export function CinematicTimeline({
 
   return (
     <div className="operator-deck__plate mx-auto w-full max-w-5xl px-4 py-4 sm:px-5 sm:py-5">
-      {/* Era breakers */}
+      {/* Era breakers — multi-select */}
       <div
         className="flex flex-wrap gap-2 sm:gap-2.5"
         role="group"
         aria-label="Era circuit filters"
       >
         {visibleEras.map((e) => {
-          const filtered = eraFilterId === e.id;
+          const filtered = eraFilterIds.includes(e.id);
           return (
             <button
               key={e.id}
               type="button"
-              onClick={() => jumpToEra(e)}
+              onClick={() => onEraSelect(e.id)}
               className={[
                 "operator-breaker",
                 filtered ? "is-active" : "",
@@ -71,15 +75,21 @@ export function CinematicTimeline({
         })}
       </div>
 
-      <div className="operator-readout" key={displayEra.id}>
-        <span className="operator-readout__title">{displayEra.label}</span>
-        {eraFilter ? (
+      <div className="operator-readout" key={filterTitle ?? displayEra.id}>
+        <span className="operator-readout__title">
+          {filterTitle ?? displayEra.label}
+        </span>
+        {eraFilters.length > 0 ? (
           <span className="ml-2 text-[9px] tracking-[0.14em] text-[#8a98a6] uppercase">
             filtered
           </span>
         ) : null}
         <span className="mx-1.5 text-[#5c6670]">—</span>
-        <span>{displayEra.tagline}</span>
+        <span>
+          {eraFilters.length <= 1
+            ? displayEra.tagline
+            : "Multiple eras engaged — towers completed in any selected window"}
+        </span>
       </div>
 
       {/* DIN-rail year scrubber */}
@@ -97,7 +107,7 @@ export function CinematicTimeline({
                 const segEnd = Math.min(e.endYear, max);
                 const left = ((segStart - min) / (max - min || 1)) * 100;
                 const width = ((segEnd - segStart) / (max - min || 1)) * 100;
-                const highlighted = eraFilterId === e.id;
+                const highlighted = eraFilterIds.includes(e.id);
                 return (
                   <span
                     key={e.id}

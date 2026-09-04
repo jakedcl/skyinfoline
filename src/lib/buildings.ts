@@ -64,14 +64,24 @@ export function buildingCompletedInEra(building: Building, era: Era): boolean {
   );
 }
 
-/** Skyline visibility: era filter (completion year) + scrub year (lifespan). */
+/** True when completed in any of the selected eras (empty list = no era filter). */
+export function buildingCompletedInEras(
+  building: Building,
+  eras: Era[],
+): boolean {
+  if (eras.length === 0) return true;
+  return eras.some((era) => buildingCompletedInEra(building, era));
+}
+
+/** Skyline visibility: era filter(s) + scrub year (lifespan). */
 export function isSkylineVisible(
   building: Building,
   scrubYear: number,
-  eraFilter?: Era | null,
+  eraFilters?: Era | Era[] | null,
   skipYearCheck = false,
 ): boolean {
-  if (eraFilter && !buildingCompletedInEra(building, eraFilter)) {
+  const eras = normalizeEraFilters(eraFilters);
+  if (eras.length > 0 && !buildingCompletedInEras(building, eras)) {
     return false;
   }
   if (skipYearCheck) {
@@ -80,14 +90,19 @@ export function isSkylineVisible(
   return isVisibleAtYear(building, scrubYear);
 }
 
+function normalizeEraFilters(eraFilters?: Era | Era[] | null): Era[] {
+  if (!eraFilters) return [];
+  return Array.isArray(eraFilters) ? eraFilters : [eraFilters];
+}
+
 export function buildingsVisibleInSkyline(
   buildings: Building[],
   scrubYear: number,
-  eraFilter?: Era | null,
+  eraFilters?: Era | Era[] | null,
   skipYearCheck = false,
 ): Building[] {
   return buildings.filter((b) =>
-    isSkylineVisible(b, scrubYear, eraFilter, skipYearCheck),
+    isSkylineVisible(b, scrubYear, eraFilters, skipYearCheck),
   );
 }
 
@@ -113,11 +128,11 @@ export function skylineNeighbors(
   selectedId: string | null,
   scrubYear: number,
   sortDirection: SortDirection = "desc",
-  eraFilter?: Era | null,
+  eraFilters?: Era | Era[] | null,
   skipYearCheck = false,
 ): { prevId: string | null; nextId: string | null } {
   const row = sortedByOrder(buildings, sortDirection).filter((b) =>
-    isSkylineVisible(b, scrubYear ?? 0, eraFilter, skipYearCheck),
+    isSkylineVisible(b, scrubYear ?? 0, eraFilters, skipYearCheck),
   );
   const index = selectedId ? row.findIndex((b) => b.id === selectedId) : -1;
   if (index < 0) return { prevId: null, nextId: null };

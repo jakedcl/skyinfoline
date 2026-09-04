@@ -485,6 +485,14 @@ body {
     inset 0 -2px 8px rgba(0, 0, 0, 0.35);
 }
 
+/* Keep console docked to the bottom of the viewport */
+.operator-dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.35);
+}
+
 .operator-deck__plate {
   border: 1px solid #1f242b;
   background:
