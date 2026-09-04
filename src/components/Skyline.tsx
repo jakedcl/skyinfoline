@@ -116,6 +116,7 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
+  const [fitsViewport, setFitsViewport] = useState(true);
   const [skylineMaxPx, setSkylineMaxPx] = useState(() => {
     if (typeof window === "undefined") return SKYLINE_MAX_PX;
     return skylineMaxPxForViewport(window.innerWidth, window.innerHeight);
@@ -165,7 +166,10 @@ export function Skyline({
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
       // Fit sparse / modest sets to width; dense eras keep full height + scroll.
-      setScale(skylineFitScale(available, content, mobile));
+      const nextScale = skylineFitScale(available, content, mobile);
+      setScale(nextScale);
+      // Fit-scale or naturally fits → center. Full-size overflow → scroll from start.
+      setFitsViewport(nextScale < 1 || content * nextScale <= available);
     };
 
     update();
@@ -192,10 +196,14 @@ export function Skyline({
   return (
     <div
       ref={scrollerRef}
-      className="skyline-scroll relative w-full overflow-x-auto"
+      className="skyline-scroll relative w-full"
+      style={{ overflowX: fitsViewport ? "hidden" : "auto" }}
     >
       <div
-        className="relative mx-auto overflow-visible"
+        className={[
+          "relative mx-auto",
+          fitsViewport ? "overflow-hidden" : "overflow-visible",
+        ].join(" ")}
         style={{
           width: "max-content",
           minWidth: "100%",
@@ -205,7 +213,11 @@ export function Skyline({
         }}
       >
         <div
-          className="relative mx-auto overflow-visible"
+          className={[
+            "relative mx-auto",
+            // Contain unscaled layout width so fit-scale doesn't inflate scrollWidth.
+            fitsViewport ? "overflow-hidden" : "overflow-visible",
+          ].join(" ")}
           style={{
             width: scaledWidth ?? "100%",
             height: rowHeight,
@@ -222,9 +234,9 @@ export function Skyline({
             ref={rowRef}
             className={[
               "relative z-[1] flex origin-top-left items-end pb-0",
-              // When scrolling at full size, start at the first tower so
-              // scrollLeft 0 is never empty padding from justify-center.
-              isNarrow || scale < 1 ? "justify-start" : "justify-center",
+              // Center when the row fits; start-align only when the user must scroll
+              // so scrollLeft 0 is never empty space from justify-center.
+              fitsViewport ? "justify-center" : "justify-start",
             ].join(" ")}
             style={{
               gap: GAP_PX,
