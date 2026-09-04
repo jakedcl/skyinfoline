@@ -8,8 +8,8 @@ export default async function Home() {
   const buildings = await getBuildings();
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
-      <main className="flex flex-1 flex-col">
+    <div className="flex min-h-dvh flex-1 flex-col">
+      <main className="flex min-h-dvh flex-1 flex-col">
         <SkylineExplorer buildings={buildings} />
       </main>
     </div>

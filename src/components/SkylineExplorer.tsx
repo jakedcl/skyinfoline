@@ -12,7 +12,7 @@ import {
   skylineNeighbors,
   yearRange,
 } from "@/lib/buildings";
-import { eraById, eraJumpYear, eraScrubBounds } from "@/lib/eras";
+import { eraById, eraJumpYear, eraScrubBounds, erasByIds } from "@/lib/eras";
 import { selectLandingBuildings } from "@/lib/landingSet";
 import { SKYLINE_MOBILE_MAX_WIDTH_PX } from "@/lib/skyline-layout";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
@@ -49,11 +49,11 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [viewpointId, setViewpointId] = useState<ViewpointId>("jersey-city");
   const [prevScrubYear, setPrevScrubYear] = useState(max);
-  const [eraFilterId, setEraFilterId] = useState<string | null>(null);
+  const [eraFilterIds, setEraFilterIds] = useState<string[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
   const viewportWidth = useViewportWidth();
 
-  const eraFilter = eraById(eraFilterId);
+  const eraFilters = erasByIds(eraFilterIds);
   const skipYearCheck = !hasInteracted;
   /** Pre-interaction: tallest-by-height subset sized to viewport width. */
   const isLanding = !hasInteracted;
@@ -77,7 +77,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         selectedId,
         scrubYear,
         viewpoint.sortDirection,
-        eraFilter,
+        eraFilters,
         skipYearCheck,
       ),
     [
@@ -85,7 +85,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       selectedId,
       scrubYear,
       viewpoint.sortDirection,
-      eraFilter,
+      eraFilters,
       skipYearCheck,
     ],
   );
@@ -106,7 +106,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   useEffect(() => {
     if (
       selected &&
-      !isSkylineVisible(selected, scrubYear, eraFilter, skipYearCheck)
+      !isSkylineVisible(selected, scrubYear, eraFilters, skipYearCheck)
     ) {
       setSelectedId(null);
       return;
@@ -121,7 +121,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   }, [
     scrubYear,
     selected,
-    eraFilter,
+    eraFilters,
     skipYearCheck,
     isLanding,
     skylineBuildings,
@@ -130,12 +130,12 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const handleScrubChange = useCallback(
     (year: number) => {
       setHasInteracted(true);
-      if (eraFilterId) {
-        setEraFilterId(null);
+      if (eraFilterIds.length > 0) {
+        setEraFilterIds([]);
       }
       setScrubYear(Math.min(max, Math.max(min, year)));
     },
-    [eraFilterId, min, max],
+    [eraFilterIds.length, min, max],
   );
 
   useEffect(() => {
@@ -175,23 +175,28 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
     setSelectedId(null);
   };
 
-  const handleEraSelect = (eraId: string | null) => {
+  const handleEraSelect = (eraId: string) => {
     setHasInteracted(true);
-    if (eraId === eraFilterId) {
-      setEraFilterId(null);
-      return;
-    }
-    const era = eraById(eraId);
-    if (!era) return;
-    setEraFilterId(era.id);
-    const jump = eraJumpYear(era, max);
-    const { min: eraMin, max: eraMax } = eraScrubBounds(era, min, max);
-    setScrubYear(Math.min(eraMax, Math.max(eraMin, jump)));
+    setEraFilterIds((prev) => {
+      const next = prev.includes(eraId)
+        ? prev.filter((id) => id !== eraId)
+        : [...prev, eraId];
+      const selectedEras = erasByIds(next);
+      if (selectedEras.length > 0) {
+        const bounds = eraScrubBounds(selectedEras, min, max);
+        const focus =
+          eraById(eraId) && next.includes(eraId)
+            ? eraJumpYear(eraById(eraId)!, max)
+            : bounds.max;
+        setScrubYear(Math.min(bounds.max, Math.max(bounds.min, focus)));
+      }
+      return next;
+    });
   };
 
   return (
-    <div className="flex w-full flex-col">
-      <nav className="relative z-20 border-b border-white/10 bg-[var(--sky-top)]/85 px-4 py-2.5 backdrop-blur-sm sm:px-6">
+    <div className="flex min-h-dvh w-full flex-col">
+      <nav className="relative z-20 shrink-0 border-b border-white/10 bg-[var(--sky-top)]/85 px-4 py-2.5 backdrop-blur-sm sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <h1 className="text-base font-semibold tracking-tight text-white sm:text-lg">
             Skyinfoline
@@ -203,58 +208,62 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         </div>
       </nav>
 
-      <div className="skyline-hero">
+      <div className="skyline-hero flex min-h-0 flex-1 flex-col">
         <div ref={heroBgRef} className="skyline-hero__bg" aria-hidden />
 
         <div
           className={[
-            "viewpoint-atmosphere relative z-10 transition-[filter] duration-700",
+            "viewpoint-atmosphere relative z-10 flex min-h-0 flex-1 flex-col transition-[filter] duration-700",
             viewpoint.atmosphereClass,
           ].join(" ")}
         >
-          <div className="mb-1 flex justify-between px-4 text-[10px] tracking-[0.2em] text-white/70 uppercase drop-shadow-sm sm:mb-2 sm:px-8">
+          <div className="mb-1 flex shrink-0 justify-between px-4 text-[10px] tracking-[0.2em] text-white/70 uppercase drop-shadow-sm sm:mb-2 sm:px-8">
             <span>← {viewpoint.leftLabel}</span>
             <span>{viewpoint.rightLabel} →</span>
           </div>
 
-          <Skyline
-            buildings={skylineBuildings}
-            selectedId={selectedId}
-            hoveredId={hoveredId}
-            scrubYear={scrubYear}
-            eraFilter={eraFilter}
-            skipYearCheck={skipYearCheck}
-            sortDirection={viewpoint.sortDirection}
-            viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
-            newlyBuiltIds={newlyBuiltIds}
-            forceFitWidth={
-              isLanding || viewportWidth < SKYLINE_MOBILE_MAX_WIDTH_PX
-            }
-            onSelect={setSelectedId}
-            onHover={setHoveredId}
-          />
+          <div className="relative min-h-0 flex-1">
+            <Skyline
+              buildings={skylineBuildings}
+              selectedId={selectedId}
+              hoveredId={hoveredId}
+              scrubYear={scrubYear}
+              eraFilters={eraFilters}
+              skipYearCheck={skipYearCheck}
+              sortDirection={viewpoint.sortDirection}
+              viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
+              newlyBuiltIds={newlyBuiltIds}
+              forceFitWidth={
+                isLanding || viewportWidth < SKYLINE_MOBILE_MAX_WIDTH_PX
+              }
+              onSelect={setSelectedId}
+              onHover={setHoveredId}
+            />
+          </div>
         </div>
 
         {/* Soft perspective floor — faux ground plane under 2D cutouts */}
         <div className="skyline-ground" aria-hidden />
-        <div className="water-plane relative z-10 h-10 w-full" aria-hidden />
+        <div className="water-plane relative z-10 h-8 w-full shrink-0 sm:h-10" aria-hidden />
       </div>
 
-      <div className="operator-deck px-3 py-5 sm:px-6 sm:py-7">
-        <CinematicTimeline
-          min={min}
-          max={max}
-          value={scrubYear}
-          eraFilterId={eraFilterId}
-          onChange={handleScrubChange}
-          onEraSelect={handleEraSelect}
+      <div className="operator-dock shrink-0">
+        <div className="operator-deck px-3 py-3 sm:px-6 sm:py-5">
+          <CinematicTimeline
+            min={min}
+            max={max}
+            value={scrubYear}
+            eraFilterIds={eraFilterIds}
+            onChange={handleScrubChange}
+            onEraSelect={handleEraSelect}
+          />
+        </div>
+
+        <BuildingDetail
+          building={selected}
+          onClose={() => setSelectedId(null)}
         />
       </div>
-
-      <BuildingDetail
-        building={selected}
-        onClose={() => setSelectedId(null)}
-      />
     </div>
   );
 }

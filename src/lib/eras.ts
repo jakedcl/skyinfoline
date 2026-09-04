@@ -67,20 +67,32 @@ export function eraById(id: string | null | undefined): Era | null {
   return SKYLINE_ERAS.find((e) => e.id === id) ?? null;
 }
 
+export function erasByIds(ids: string[]): Era[] {
+  if (ids.length === 0) return [];
+  const set = new Set(ids);
+  return SKYLINE_ERAS.filter((e) => set.has(e.id));
+}
+
 /** Year to jump to when an era chip is pressed — end of chapter, capped at timeline max. */
 export function eraJumpYear(era: Era, timelineMax: number): number {
   return Math.min(era.endYear, timelineMax);
 }
 
-/** Scrub range when an era filter is active. */
+/** Scrub range when one or more era filters are active (union of windows). */
 export function eraScrubBounds(
-  era: Era,
+  eras: Era | Era[],
   timelineMin: number,
   timelineMax: number,
 ): { min: number; max: number } {
+  const list = Array.isArray(eras) ? eras : [eras];
+  if (list.length === 0) {
+    return { min: timelineMin, max: timelineMax };
+  }
+  const start = Math.min(...list.map((e) => e.startYear));
+  const end = Math.max(...list.map((e) => e.endYear));
   return {
-    min: Math.max(era.startYear, timelineMin),
-    max: Math.min(era.endYear, timelineMax),
+    min: Math.max(start, timelineMin),
+    max: Math.min(end, timelineMax),
   };
 }
 
