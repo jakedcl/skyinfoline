@@ -73,7 +73,11 @@ export function buildingCompletedInEras(
   return eras.some((era) => buildingCompletedInEra(building, era));
 }
 
-/** Skyline visibility: era filter(s) + scrub year (lifespan). */
+/**
+ * Skyline visibility: era filter(s) + scrub year (lifespan).
+ * When skipYearCheck is true (landing set or active era filters), only era
+ * membership applies — timeline scrub year does not hide towers.
+ */
 export function isSkylineVisible(
   building: Building,
   scrubYear: number,
