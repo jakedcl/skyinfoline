@@ -7,13 +7,13 @@ export const SKYLINE_ROW_EXTRA_PX = 48;
  * lift (~scale 1.1 + 14px). The skyline scroller’s overflow-x ≠ visible forces
  * overflow-y clipping — labels outside this reserve get cut at the top edge.
  */
-export const SKYLINE_LABEL_RESERVE_PX = 160;
+export const SKYLINE_LABEL_RESERVE_PX = 200;
 /** Tighter mobile chrome so towers sit higher in the frame. */
 export const SKYLINE_MOBILE_ROW_EXTRA_PX = 24;
-export const SKYLINE_MOBILE_LABEL_RESERVE_PX = 120;
+export const SKYLINE_MOBILE_LABEL_RESERVE_PX = 150;
 /** Top pad for angled name labels — keep ≤ extra + label reserve (border-box). */
-export const SKYLINE_PAD_TOP_PX = 128;
-export const SKYLINE_MOBILE_PAD_TOP_PX = 88;
+export const SKYLINE_PAD_TOP_PX = 160;
+export const SKYLINE_MOBILE_PAD_TOP_PX = 110;
 export const SKYLINE_ROW_HEIGHT_PX =
   SKYLINE_MAX_PX + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
 
