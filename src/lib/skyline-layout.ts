@@ -1,13 +1,19 @@
 /** Shared skyline row geometry — must stay in sync with Skyline tower scaling. */
 export const SKYLINE_MAX_PX = 320;
 export const SKYLINE_ROW_EXTRA_PX = 48;
-export const SKYLINE_LABEL_RESERVE_PX = 72;
+/**
+ * Headroom above the tallest tower for subway-map labels (`rotate(-52deg)`).
+ * Must cover long names (Woolworth, Empire State, One WTC) plus select/hover
+ * lift (~scale 1.1 + 14px). The skyline scroller’s overflow-x ≠ visible forces
+ * overflow-y clipping — labels outside this reserve get cut at the top edge.
+ */
+export const SKYLINE_LABEL_RESERVE_PX = 160;
 /** Tighter mobile chrome so towers sit higher in the frame. */
 export const SKYLINE_MOBILE_ROW_EXTRA_PX = 24;
-export const SKYLINE_MOBILE_LABEL_RESERVE_PX = 40;
-/** Tailwind-equivalent top pad for angled name labels (pt-20 / pt-8). */
-export const SKYLINE_PAD_TOP_PX = 80;
-export const SKYLINE_MOBILE_PAD_TOP_PX = 32;
+export const SKYLINE_MOBILE_LABEL_RESERVE_PX = 120;
+/** Top pad for angled name labels — keep ≤ extra + label reserve (border-box). */
+export const SKYLINE_PAD_TOP_PX = 128;
+export const SKYLINE_MOBILE_PAD_TOP_PX = 88;
 export const SKYLINE_ROW_HEIGHT_PX =
   SKYLINE_MAX_PX + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
 

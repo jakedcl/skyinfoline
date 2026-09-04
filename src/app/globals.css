@@ -167,8 +167,11 @@ body {
 .skyline-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--steel-bright) transparent;
+  /* Horizontal safety scroll only. Spec: overflow-x ≠ visible forces
+     overflow-y away from visible — keep y hidden (no vertical scrollbar)
+     and rely on skyline pad/label reserve so angled names stay inside. */
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;

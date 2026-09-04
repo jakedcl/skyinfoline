@@ -202,9 +202,10 @@ export function Skyline({
   const transition = `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, transform ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`;
 
   return (
+    // overflow-x on .skyline-scroll forces y-clip; pad/label reserve keeps names inside.
     <div
       ref={scrollerRef}
-      className="skyline-scroll relative w-full overflow-x-hidden overflow-y-visible"
+      className="skyline-scroll relative w-full"
     >
       <div
         className="relative mx-auto overflow-visible"
