@@ -2,6 +2,12 @@
 export const SKYLINE_MAX_PX = 320;
 export const SKYLINE_ROW_EXTRA_PX = 48;
 export const SKYLINE_LABEL_RESERVE_PX = 72;
+/** Tighter mobile chrome so towers sit higher in the frame. */
+export const SKYLINE_MOBILE_ROW_EXTRA_PX = 24;
+export const SKYLINE_MOBILE_LABEL_RESERVE_PX = 40;
+/** Tailwind-equivalent top pad for angled name labels (pt-20 / pt-8). */
+export const SKYLINE_PAD_TOP_PX = 80;
+export const SKYLINE_MOBILE_PAD_TOP_PX = 32;
 export const SKYLINE_ROW_HEIGHT_PX =
   SKYLINE_MAX_PX + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
 
@@ -16,8 +22,35 @@ export const SKYLINE_HOVER_SCALE = 1.1;
 export const SKYLINE_MOBILE_VH_FRACTION = 0.42;
 export const SKYLINE_MOBILE_MAX_CAP_PX = 400;
 
-export function skylineRowHeightPx(maxPx: number): number {
-  return maxPx + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
+/**
+ * Below this fit scale on mobile, keep full tower height and allow horizontal
+ * scroll (full eras / dense sets). Iconic landing (~10) usually stays above.
+ */
+export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.52;
+
+export type SkylineRowOpts = {
+  /** Narrow viewport — use compact label/extra reserve. */
+  narrow?: boolean;
+};
+
+export function skylineLabelReservePx(narrow = false): number {
+  return narrow ? SKYLINE_MOBILE_LABEL_RESERVE_PX : SKYLINE_LABEL_RESERVE_PX;
+}
+
+export function skylineRowExtraPx(narrow = false): number {
+  return narrow ? SKYLINE_MOBILE_ROW_EXTRA_PX : SKYLINE_ROW_EXTRA_PX;
+}
+
+export function skylinePadTopPx(narrow = false): number {
+  return narrow ? SKYLINE_MOBILE_PAD_TOP_PX : SKYLINE_PAD_TOP_PX;
+}
+
+export function skylineRowHeightPx(
+  maxPx: number,
+  opts: SkylineRowOpts = {},
+): number {
+  const narrow = opts.narrow ?? false;
+  return maxPx + skylineRowExtraPx(narrow) + skylineLabelReservePx(narrow);
 }
 
 /** Desktop stays at SKYLINE_MAX_PX; mobile uses min(42vh, 400), never below desktop. */
@@ -35,15 +68,31 @@ export function skylineMaxPxForViewport(
   );
 }
 
+/**
+ * Fit scale for the measured content width. On mobile, refuse tiny scales so
+ * dense eras stay scrollable at full tower height.
+ */
+export function skylineFitScale(
+  availablePx: number,
+  contentPx: number,
+  narrow: boolean,
+): number {
+  if (contentPx <= 0 || availablePx <= 0) return 1;
+  const fit = Math.min(1, availablePx / contentPx);
+  if (!narrow) return fit;
+  return fit >= SKYLINE_MOBILE_MIN_FIT_SCALE ? fit : 1;
+}
+
 /** Vertical position from row top; matches `towerSize` height mapping × scale. */
 export function heightFtToRowY(
   heightFt: number,
   tallestFt: number,
   scale = 1,
   maxPx = SKYLINE_MAX_PX,
+  opts: SkylineRowOpts = {},
 ): number {
   const heightPx = (heightFt / tallestFt) * maxPx;
-  return (skylineRowHeightPx(maxPx) - heightPx) * scale;
+  return (skylineRowHeightPx(maxPx, opts) - heightPx) * scale;
 }
 
 /** Pick a round foot interval (~4–6 ticks) for the y-axis. */
