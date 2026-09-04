@@ -33,7 +33,9 @@ const HIT_PAD_X = 4;
 const GAP_PX = 4;
 const SKYLINE_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SKYLINE_TRANSITION_MS = 550;
-const HOVER_LIFT_PX = 6;
+/** Faux-3D lift — base contact shadow stays planted (transform only on cutout). */
+const HOVER_LIFT_PX = 10;
+const SELECT_LIFT_PX = 14;
 
 type SkylineProps = {
   buildings: Building[];
@@ -280,6 +282,15 @@ export function Skyline({
               const emphasized = selected || hovered;
               const slotWidth = built ? widthPx + HIT_PAD_X * 2 : 0;
 
+              const liftPx = selected
+                ? SELECT_LIFT_PX
+                : hovered
+                  ? HOVER_LIFT_PX
+                  : 0;
+              const shadowWidth = built
+                ? Math.max(12, widthPx * (emphasized ? 0.92 : 0.78))
+                : 0;
+
               return (
                 <button
                   key={building.id}
@@ -294,35 +305,36 @@ export function Skyline({
                   onFocus={() => built && onHover(building.id)}
                   onBlur={() => onHover(null)}
                   className={[
-                    "group relative flex shrink-0 flex-col items-center overflow-visible outline-none",
+                    "group relative flex shrink-0 flex-col items-center justify-end overflow-visible outline-none",
                     built ? "cursor-pointer" : "pointer-events-none",
                     emphasized ? "z-20" : "z-0 group-focus-visible:z-20",
-                    justBuilt ? "building-entrance" : "",
                   ].join(" ")}
                   style={{
                     width: slotWidth,
                     paddingInline: built ? HIT_PAD_X : 0,
                     opacity: built ? 1 : 0,
-                    transformOrigin: "bottom center",
-                    transform: emphasized
-                      ? `translateY(-${HOVER_LIFT_PX}px) scale(${SKYLINE_HOVER_SCALE})`
-                      : "translateY(0) scale(1)",
-                    transition,
+                    transition: `width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, opacity ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, padding ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}`,
                   }}
                 >
+                  {/* Lift applies only to the tower — contact shadow stays on the ground */}
                   <span
                     className={[
-                      "relative block shrink-0",
+                      "relative z-[1] block shrink-0",
                       selected
                         ? "text-[var(--accent)]"
                         : hovered
                           ? "text-[var(--steel-bright)]"
                           : "text-[var(--steel)]",
+                      justBuilt ? "building-entrance" : "",
                     ].join(" ")}
                     style={{
                       height: heightPx,
                       width: widthPx,
-                      transition: `height ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, width ${SKYLINE_TRANSITION_MS}ms ${SKYLINE_EASE}, color 300ms, filter 300ms`,
+                      transformOrigin: "bottom center",
+                      transform: emphasized
+                        ? `translateY(-${liftPx}px) scale(${SKYLINE_HOVER_SCALE})`
+                        : "translateY(0) scale(1)",
+                      transition,
                     }}
                   >
                     <span
@@ -379,6 +391,17 @@ export function Skyline({
                       />
                     ) : null}
                   </span>
+
+                  {built ? (
+                    <span
+                      aria-hidden
+                      className={[
+                        "skyline-tower-shadow",
+                        emphasized ? "skyline-tower-shadow--emphasized" : "",
+                      ].join(" ")}
+                      style={{ width: shadowWidth }}
+                    />
+                  ) : null}
                 </button>
               );
             })}

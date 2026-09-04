@@ -62,6 +62,7 @@ Update this file when a tab’s status changes (`active` → `done` → `parked`
 - Night mode / illumination
 - Micro-copy and typography pass
 - Loading / empty states
+- True 3D exploration (orbit / joysticks) — later phase; current skyline is faux-3D with 2D cutouts only
 
 **Depends on:** Tab 1 for best demo; can start small UI passes anytime.
 

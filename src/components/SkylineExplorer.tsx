@@ -5,6 +5,7 @@ import { BuildingDetail } from "@/components/BuildingDetail";
 import { CinematicTimeline } from "@/components/CinematicTimeline";
 import { Skyline } from "@/components/Skyline";
 import { ViewpointSwitcher } from "@/components/ViewpointSwitcher";
+import { useHeroParallax } from "@/hooks/useHeroParallax";
 import {
   findBuilding,
   isSkylineVisible,
@@ -56,6 +57,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const skipYearCheck = !hasInteracted;
   /** Pre-interaction: tallest-by-height subset sized to viewport width. */
   const isLanding = !hasInteracted;
+  const heroBgRef = useHeroParallax<HTMLDivElement>();
 
   const skylineBuildings = useMemo(
     () =>
@@ -202,7 +204,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       </nav>
 
       <div className="skyline-hero">
-        <div className="skyline-hero__bg" aria-hidden />
+        <div ref={heroBgRef} className="skyline-hero__bg" aria-hidden />
 
         <div
           className={[
@@ -233,6 +235,8 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           />
         </div>
 
+        {/* Soft perspective floor — faux ground plane under 2D cutouts */}
+        <div className="skyline-ground" aria-hidden />
         <div className="water-plane relative z-10 h-10 w-full" aria-hidden />
       </div>
 
