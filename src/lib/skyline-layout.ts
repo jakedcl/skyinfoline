@@ -26,14 +26,28 @@ export const SKYLINE_MOBILE_MAX_CAP_PX = 400;
  * At ~460px available (540 viewport) → ~345px; at ~310px (390) → ~232px.
  */
 export const SKYLINE_MOBILE_WIDTH_HEIGHT_FACTOR = 0.75;
-/** Floor so very narrow phones don't collapse towers to unreadable stubs. */
+/** Floor so sparse mobile sets (landing / early eras) stay readable. */
 export const SKYLINE_MOBILE_MIN_MAX_PX = 240;
-
 /**
- * Below this fit scale on mobile, keep full tower height and allow horizontal
- * scroll (full eras / dense sets). Landing / forceFit always shrinks to width.
+ * Tall presentation only while the visible set is sparse (landing top-N,
+ * early eras). Above this, shrink tower max so more towers fit the width.
  */
-export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.52;
+export const SKYLINE_MOBILE_SPARSE_COUNT = 12;
+/**
+ * Dense mobile floor — full catalog / late eras must still be readable,
+ * but short enough that force-fit width stays usable.
+ */
+export const SKYLINE_MOBILE_DENSE_MIN_MAX_PX = 140;
+/**
+ * How many extra towers (past SPARSE_COUNT) map density t → 1.
+ * At 12 + 24 = 36 visible, tower max is at the dense floor.
+ */
+export const SKYLINE_MOBILE_DENSE_COUNT_SPAN = 24;
+/**
+ * Last-resort min fit scale on mobile after maxPx density shrink.
+ * Below this, keep the floor and allow gentle horizontal scroll.
+ */
+export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.35;
 
 export type SkylineRowOpts = {
   /** Narrow viewport — use compact label/extra reserve. */
@@ -61,13 +75,27 @@ export function skylineRowHeightPx(
 }
 
 /**
- * Desktop stays at SKYLINE_MAX_PX. Mobile may boost toward min(42vh, 400), but
- * height is also capped by available width — taller only when there's room so
- * the landing top-N (aspect-driven widths) can still fit on screen.
+ * Density factor 0…1 for mobile tower max. Sparse (≤12) → 0 (tall);
+ * full catalog (~36+) → 1 (short).
+ */
+export function skylineMobileDensity(visibleCount: number): number {
+  if (visibleCount <= SKYLINE_MOBILE_SPARSE_COUNT) return 0;
+  return Math.min(
+    1,
+    (visibleCount - SKYLINE_MOBILE_SPARSE_COUNT) /
+      SKYLINE_MOBILE_DENSE_COUNT_SPAN,
+  );
+}
+
+/**
+ * Desktop stays at SKYLINE_MAX_PX. Mobile boosts toward min(42vh, 400) when
+ * sparse, but height is capped by available width — and further reduced as
+ * visibleCount grows so filtered/full catalogs force-fit without clipping.
  */
 export function skylineMaxPxForViewport(
   viewportWidthPx: number,
   viewportHeightPx: number,
+  visibleCount = 0,
 ): number {
   if (viewportWidthPx >= SKYLINE_MOBILE_MAX_WIDTH_PX) return SKYLINE_MAX_PX;
 
@@ -80,24 +108,37 @@ export function skylineMaxPxForViewport(
     viewportWidthPx - SKYLINE_SCROLL_PAD_PX * 2,
   );
   const widthCap = Math.round(available * SKYLINE_MOBILE_WIDTH_HEIGHT_FACTOR);
-  const heightBudget = Math.max(SKYLINE_MOBILE_MIN_MAX_PX, widthCap);
+  const density = skylineMobileDensity(visibleCount);
+
+  // Sparse: floor at MIN_MAX so landing top-N stays tall-ish.
+  // Dense: allow down to DENSE_MIN so many towers share the width.
+  const floorPx = Math.round(
+    SKYLINE_MOBILE_MIN_MAX_PX +
+      (SKYLINE_MOBILE_DENSE_MIN_MAX_PX - SKYLINE_MOBILE_MIN_MAX_PX) * density,
+  );
+  const heightBudget = Math.max(
+    floorPx,
+    Math.round(widthCap * (1 - 0.45 * density)),
+  );
 
   // Boost above desktop when both vh and width allow; otherwise shrink toward
-  // the width budget so narrow phones don't force horizontal clip of top-10.
+  // the (density-aware) width budget so narrow phones don't clip.
   return Math.min(Math.max(SKYLINE_MAX_PX, vhCap), heightBudget);
 }
 
 export type SkylineFitScaleOpts = {
   /**
-   * Always shrink to fit (landing top-N). When false on mobile, refuse scales
-   * below SKYLINE_MOBILE_MIN_FIT_SCALE so dense eras stay full-height + scroll.
+   * Always shrink to fit (landing, or any mobile primary view). When false on
+   * desktop this still fits; kept for call-site clarity.
    */
   forceFit?: boolean;
 };
 
 /**
- * Fit scale for the measured content width. On mobile, refuse tiny scales so
- * dense eras stay scrollable at full tower height — unless forceFit (landing).
+ * Fit scale for the measured content width.
+ * Mobile / forceFit: always shrink to width. If the scale would fall below
+ * SKYLINE_MOBILE_MIN_FIT_SCALE after density maxPx shrink, clamp to that floor
+ * and let the scroller allow gentle overflow as a last resort.
  */
 export function skylineFitScale(
   availablePx: number,
@@ -107,8 +148,12 @@ export function skylineFitScale(
 ): number {
   if (contentPx <= 0 || availablePx <= 0) return 1;
   const fit = Math.min(1, availablePx / contentPx);
-  if (!narrow || opts.forceFit) return fit;
-  return fit >= SKYLINE_MOBILE_MIN_FIT_SCALE ? fit : 1;
+  const forceFit = Boolean(opts.forceFit) || narrow;
+  if (!forceFit) return fit;
+  if (narrow && fit < SKYLINE_MOBILE_MIN_FIT_SCALE) {
+    return SKYLINE_MOBILE_MIN_FIT_SCALE;
+  }
+  return fit;
 }
 
 /** Vertical position from row top; matches `towerSize` height mapping × scale. */

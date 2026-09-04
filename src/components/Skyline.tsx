@@ -46,8 +46,9 @@ type SkylineProps = {
   viewpointLabel?: string;
   newlyBuiltIds?: Set<string>;
   /**
-   * Landing top-N: always shrink to fit the viewport width so the minimum
-   * tallest set never clips / scrolls off-screen on phones.
+   * Always shrink to fit viewport width (landing top-N). On narrow viewports
+   * Skyline also force-fits after timeline/era interaction — this flag is
+   * mainly for desktop landing clarity.
    */
   forceFitWidth?: boolean;
   onSelect: (id: string) => void;
@@ -134,13 +135,17 @@ export function Skyline({
   useLayoutEffect(() => {
     const syncMax = () => {
       setSkylineMaxPx(
-        skylineMaxPxForViewport(window.innerWidth, window.innerHeight),
+        skylineMaxPxForViewport(
+          window.innerWidth,
+          window.innerHeight,
+          visibleCount,
+        ),
       );
     };
     syncMax();
     window.addEventListener("resize", syncMax);
     return () => window.removeEventListener("resize", syncMax);
-  }, []);
+  }, [visibleCount]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -167,13 +172,13 @@ export function Skyline({
 
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
-      // Landing force-fits; otherwise dense mobile eras keep full height + scroll.
+      // Mobile always force-fits (landing or post-filter). Desktop landing too.
       const nextScale = skylineFitScale(available, content, mobile, {
-        forceFit: forceFitWidth,
+        forceFit: forceFitWidth || mobile,
       });
       setScale(nextScale);
-      // Fit-scale or naturally fits → center. Full-size overflow → scroll from start.
-      setFitsViewport(nextScale < 1 || content * nextScale <= available);
+      // Center when scaled content fits; last-resort min-scale overflow → scroll.
+      setFitsViewport(content * nextScale <= available + 0.5);
     };
 
     update();
