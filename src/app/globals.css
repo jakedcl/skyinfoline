@@ -77,7 +77,7 @@ body {
    True 3D exploration (orbit / joysticks) is planned later. */
 .skyline-hero {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .skyline-hero__bg {

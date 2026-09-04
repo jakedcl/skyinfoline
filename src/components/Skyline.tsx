@@ -125,8 +125,6 @@ export function Skyline({
   const rowRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
-  /** SSR-safe: assume fits → justify-center; flip to start after measure if scroll needed. */
-  const [fitsViewport, setFitsViewport] = useState(true);
   /** Desktop defaults for SSR/first paint; real viewport applied in layout effect. */
   const [skylineMaxPx, setSkylineMaxPx] = useState(SKYLINE_MAX_PX);
   const [isNarrow, setIsNarrow] = useState(false);
@@ -174,13 +172,11 @@ export function Skyline({
 
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
-      // Mobile always force-fits (landing or post-filter). Desktop landing too.
+      // Always fit the full visible set into the viewport width — no clipping.
       const nextScale = skylineFitScale(available, content, mobile, {
-        forceFit: forceFitWidth || mobile,
+        forceFit: true,
       });
       setScale(nextScale);
-      // Center when scaled content fits; last-resort min-scale overflow → scroll.
-      setFitsViewport(content * nextScale <= available + 0.5);
     };
 
     update();
@@ -208,14 +204,10 @@ export function Skyline({
   return (
     <div
       ref={scrollerRef}
-      className="skyline-scroll relative w-full"
-      style={{ overflowX: fitsViewport ? "hidden" : "auto" }}
+      className="skyline-scroll relative w-full overflow-x-hidden overflow-y-visible"
     >
       <div
-        className={[
-          "relative mx-auto",
-          fitsViewport ? "overflow-hidden" : "overflow-visible",
-        ].join(" ")}
+        className="relative mx-auto overflow-visible"
         style={{
           width: "max-content",
           minWidth: "100%",
@@ -225,11 +217,7 @@ export function Skyline({
         }}
       >
         <div
-          className={[
-            "relative mx-auto",
-            // Contain unscaled layout width so fit-scale doesn't inflate scrollWidth.
-            fitsViewport ? "overflow-hidden" : "overflow-visible",
-          ].join(" ")}
+          className="relative mx-auto overflow-visible"
           style={{
             width: scaledWidth ?? "100%",
             height: rowHeight,
@@ -244,12 +232,7 @@ export function Skyline({
           />
           <div
             ref={rowRef}
-            className={[
-              "relative z-[1] flex origin-top-left items-end pb-0",
-              // Center when the row fits; start-align only when the user must scroll
-              // so scrollLeft 0 is never empty space from justify-center.
-              fitsViewport ? "justify-center" : "justify-start",
-            ].join(" ")}
+            className="relative z-[1] flex origin-top-left items-end justify-center pb-0"
             style={{
               gap: GAP_PX,
               paddingTop: padTopPx,
