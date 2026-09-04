@@ -53,7 +53,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
 
   const eraFilter = eraById(eraFilterId);
   const skipYearCheck = !hasInteracted;
-  /** Pre-interaction: density from viewport width + importance ranking. */
+  /** Pre-interaction: tallest-by-height subset sized to viewport width. */
   const isLanding = !hasInteracted;
 
   const skylineBuildings = useMemo(
