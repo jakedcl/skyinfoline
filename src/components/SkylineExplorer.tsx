@@ -204,6 +204,8 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       </nav>
 
       <div className="skyline-hero flex min-h-0 flex-1 flex-col">
+        <div className="skyline-hero__bg" aria-hidden />
+
         <div
           className={[
             "viewpoint-atmosphere relative z-10 flex min-h-0 flex-1 flex-col transition-[filter] duration-700",
@@ -215,7 +217,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             <span>{viewpoint.rightLabel} →</span>
           </div>
 
-          {/* Spacer pushes skyline to the blue platform at the bottom */}
+          {/* Spacer pushes skyline to the platform shelf at the bottom */}
           <div className="min-h-0 flex-1" aria-hidden />
 
           <div className="relative z-10 w-full shrink-0">
