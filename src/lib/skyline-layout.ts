@@ -21,10 +21,17 @@ export const SKYLINE_HOVER_SCALE = 1.1;
 /** Mobile tower max: taller than desktop, without dominating the first screen. */
 export const SKYLINE_MOBILE_VH_FRACTION = 0.42;
 export const SKYLINE_MOBILE_MAX_CAP_PX = 400;
+/**
+ * Cap tower height by available width so aspect-driven cutouts stay fitable.
+ * At ~460px available (540 viewport) → ~345px; at ~310px (390) → ~232px.
+ */
+export const SKYLINE_MOBILE_WIDTH_HEIGHT_FACTOR = 0.75;
+/** Floor so very narrow phones don't collapse towers to unreadable stubs. */
+export const SKYLINE_MOBILE_MIN_MAX_PX = 240;
 
 /**
  * Below this fit scale on mobile, keep full tower height and allow horizontal
- * scroll (full eras / dense sets). Sparse landing subsets usually stay above.
+ * scroll (full eras / dense sets). Landing / forceFit always shrinks to width.
  */
 export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.52;
 
@@ -53,33 +60,54 @@ export function skylineRowHeightPx(
   return maxPx + skylineRowExtraPx(narrow) + skylineLabelReservePx(narrow);
 }
 
-/** Desktop stays at SKYLINE_MAX_PX; mobile uses min(42vh, 400), never below desktop. */
+/**
+ * Desktop stays at SKYLINE_MAX_PX. Mobile may boost toward min(42vh, 400), but
+ * height is also capped by available width — taller only when there's room so
+ * the landing top-N (aspect-driven widths) can still fit on screen.
+ */
 export function skylineMaxPxForViewport(
   viewportWidthPx: number,
   viewportHeightPx: number,
 ): number {
   if (viewportWidthPx >= SKYLINE_MOBILE_MAX_WIDTH_PX) return SKYLINE_MAX_PX;
-  return Math.max(
-    SKYLINE_MAX_PX,
-    Math.min(
-      SKYLINE_MOBILE_MAX_CAP_PX,
-      Math.round(viewportHeightPx * SKYLINE_MOBILE_VH_FRACTION),
-    ),
+
+  const vhCap = Math.min(
+    SKYLINE_MOBILE_MAX_CAP_PX,
+    Math.round(viewportHeightPx * SKYLINE_MOBILE_VH_FRACTION),
   );
+  const available = Math.max(
+    0,
+    viewportWidthPx - SKYLINE_SCROLL_PAD_PX * 2,
+  );
+  const widthCap = Math.round(available * SKYLINE_MOBILE_WIDTH_HEIGHT_FACTOR);
+  const heightBudget = Math.max(SKYLINE_MOBILE_MIN_MAX_PX, widthCap);
+
+  // Boost above desktop when both vh and width allow; otherwise shrink toward
+  // the width budget so narrow phones don't force horizontal clip of top-10.
+  return Math.min(Math.max(SKYLINE_MAX_PX, vhCap), heightBudget);
 }
+
+export type SkylineFitScaleOpts = {
+  /**
+   * Always shrink to fit (landing top-N). When false on mobile, refuse scales
+   * below SKYLINE_MOBILE_MIN_FIT_SCALE so dense eras stay full-height + scroll.
+   */
+  forceFit?: boolean;
+};
 
 /**
  * Fit scale for the measured content width. On mobile, refuse tiny scales so
- * dense eras stay scrollable at full tower height.
+ * dense eras stay scrollable at full tower height — unless forceFit (landing).
  */
 export function skylineFitScale(
   availablePx: number,
   contentPx: number,
   narrow: boolean,
+  opts: SkylineFitScaleOpts = {},
 ): number {
   if (contentPx <= 0 || availablePx <= 0) return 1;
   const fit = Math.min(1, availablePx / contentPx);
-  if (!narrow) return fit;
+  if (!narrow || opts.forceFit) return fit;
   return fit >= SKYLINE_MOBILE_MIN_FIT_SCALE ? fit : 1;
 }
 

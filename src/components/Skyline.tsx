@@ -45,6 +45,11 @@ type SkylineProps = {
   sortDirection?: SortDirection;
   viewpointLabel?: string;
   newlyBuiltIds?: Set<string>;
+  /**
+   * Landing top-N: always shrink to fit the viewport width so the minimum
+   * tallest set never clips / scrolls off-screen on phones.
+   */
+  forceFitWidth?: boolean;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
 };
@@ -100,6 +105,7 @@ export function Skyline({
   sortDirection = "desc",
   viewpointLabel = "Manhattan skyline",
   newlyBuiltIds,
+  forceFitWidth = false,
   onSelect,
   onHover,
 }: SkylineProps) {
@@ -161,8 +167,10 @@ export function Skyline({
 
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
-      // Fit sparse / modest sets to width; dense eras keep full height + scroll.
-      const nextScale = skylineFitScale(available, content, mobile);
+      // Landing force-fits; otherwise dense mobile eras keep full height + scroll.
+      const nextScale = skylineFitScale(available, content, mobile, {
+        forceFit: forceFitWidth,
+      });
       setScale(nextScale);
       // Fit-scale or naturally fits → center. Full-size overflow → scroll from start.
       setFitsViewport(nextScale < 1 || content * nextScale <= available);
@@ -181,6 +189,7 @@ export function Skyline({
     visibleCount,
     maxWidthPx,
     skylineMaxPx,
+    forceFitWidth,
   ]);
 
   const rowHeightPx = skylineRowHeightPx(skylineMaxPx, { narrow: isNarrow });
