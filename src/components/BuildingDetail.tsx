@@ -7,9 +7,20 @@ import { CLUSTER_LABELS, type Building } from "@/types/building";
 type BuildingDetailProps = {
   building: Building | null;
   onClose: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  canPrevious?: boolean;
+  canNext?: boolean;
 };
 
-export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
+export function BuildingDetail({
+  building,
+  onClose,
+  onPrevious,
+  onNext,
+  canPrevious = false,
+  canNext = false,
+}: BuildingDetailProps) {
   return (
     <aside
       className={[
@@ -44,8 +55,8 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <p className="operator-detail__meta">
                     {[
                       building.cluster
@@ -65,13 +76,39 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
                     </p>
                   ) : null}
                 </div>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="operator-detail__close relative z-10 shrink-0 px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] uppercase"
-                >
-                  Close
-                </button>
+                <div className="relative z-10 flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                  <div
+                    className="operator-detail__neighbors"
+                    role="group"
+                    aria-label="Building navigation"
+                  >
+                    <button
+                      type="button"
+                      onClick={onPrevious}
+                      disabled={!canPrevious || !onPrevious}
+                      className="operator-detail__nav px-2.5 py-1.5 text-[10px] font-bold tracking-[0.14em] uppercase"
+                      aria-label="Previous building"
+                    >
+                      ← Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onNext}
+                      disabled={!canNext || !onNext}
+                      className="operator-detail__nav px-2.5 py-1.5 text-[10px] font-bold tracking-[0.14em] uppercase"
+                      aria-label="Next building"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="operator-detail__close px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] uppercase"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
 
               <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">

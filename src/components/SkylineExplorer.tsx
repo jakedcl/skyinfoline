@@ -257,6 +257,22 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         <BuildingDetail
           building={selected}
           onClose={() => setSelectedId(null)}
+          canPrevious={Boolean(prevId)}
+          canNext={Boolean(nextId)}
+          onPrevious={
+            prevId
+              ? () => {
+                  setSelectedId(prevId);
+                }
+              : undefined
+          }
+          onNext={
+            nextId
+              ? () => {
+                  setSelectedId(nextId);
+                }
+              : undefined
+          }
         />
       </div>
     </div>

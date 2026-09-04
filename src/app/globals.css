@@ -746,14 +746,35 @@ body {
   color: var(--op-ink);
 }
 
-.operator-detail__close {
+.operator-detail__close,
+.operator-detail__nav {
   border: 1px solid #2a3038;
   background: linear-gradient(180deg, #5a626c, #3a4048);
   color: #e8ecf0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.operator-detail__close:hover {
+.operator-detail__close:hover,
+.operator-detail__nav:hover:not(:disabled) {
   border-color: var(--op-signal);
   color: #fff;
+}
+
+.operator-detail__neighbors {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.operator-detail__nav:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  color: #b8c0c8;
+}
+
+/* Mobile-first: neighbor buttons; desktop keeps keyboard as primary. */
+@media (min-width: 768px) {
+  .operator-detail__neighbors {
+    display: none;
+  }
 }
