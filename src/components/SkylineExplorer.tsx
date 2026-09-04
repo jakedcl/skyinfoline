@@ -224,6 +224,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             sortDirection={viewpoint.sortDirection}
             viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
             newlyBuiltIds={newlyBuiltIds}
+            forceFitWidth={isLanding}
             onSelect={setSelectedId}
             onHover={setHoveredId}
           />
