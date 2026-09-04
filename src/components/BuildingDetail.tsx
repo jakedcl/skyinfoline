@@ -13,127 +13,123 @@ export function BuildingDetail({ building, onClose }: BuildingDetailProps) {
   return (
     <aside
       className={[
-        "detail-panel relative overflow-hidden border-t border-[var(--line)] bg-[var(--panel)]/90 backdrop-blur-md transition-[max-height,opacity] duration-400 ease-out",
-        building ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0 pointer-events-none",
+        "detail-panel operator-detail relative overflow-hidden transition-[max-height,opacity] duration-400 ease-out",
+        building
+          ? "max-h-[36rem] opacity-100"
+          : "pointer-events-none max-h-0 opacity-0",
       ].join(" ")}
       aria-live="polite"
       aria-hidden={!building}
     >
       {building ? (
-        <div className="mx-auto grid max-w-6xl gap-6 px-6 py-8 md:grid-cols-[minmax(0,140px)_1fr] md:items-start">
-          <div className="relative mx-auto flex h-36 w-28 items-end justify-center text-[var(--steel)] md:mx-0">
-            {building.imageSrc ? (
-              <Image
-                src={building.imageSrc}
-                alt={building.name}
-                width={112}
-                height={144}
-                className="skyline-cutout h-full w-full object-contain object-bottom"
-                unoptimized
-              />
-            ) : (
-              <BuildingSilhouetteShape
-                type={building.silhouette ?? "rect"}
-                className="h-full w-16"
-                title={building.name}
-              />
-            )}
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs tracking-[0.2em] text-[var(--accent)] uppercase">
-                  {[
-                    building.cluster
-                      ? CLUSTER_LABELS[building.cluster]
-                      : null,
-                    building.neighborhood,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ") || "Manhattan"}
-                </p>
-                <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-3xl">
-                  {building.name}
-                </h2>
-                {building.nicknames?.length ? (
-                  <p className="mt-1 text-sm text-[var(--ink-muted)]">
-                    Also known as {building.nicknames.join(", ")}
-                  </p>
-                ) : null}
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="relative z-10 shrink-0 border border-[var(--line)] bg-[var(--panel)] px-3 py-1.5 text-xs tracking-wider text-[var(--ink-muted)] uppercase transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              >
-                Close
-              </button>
+        <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6 sm:py-6">
+          <div className="operator-detail__plate grid gap-5 p-4 sm:grid-cols-[minmax(0,120px)_1fr] sm:items-start sm:p-5">
+            <div className="relative mx-auto flex h-32 w-24 items-end justify-center text-[var(--steel)] md:mx-0">
+              {building.imageSrc ? (
+                <Image
+                  src={building.imageSrc}
+                  alt={building.name}
+                  width={112}
+                  height={144}
+                  className="skyline-cutout h-full w-full object-contain object-bottom"
+                  unoptimized
+                />
+              ) : (
+                <BuildingSilhouetteShape
+                  type={building.silhouette ?? "rect"}
+                  className="h-full w-16"
+                  title={building.name}
+                />
+              )}
             </div>
 
-            <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
-              <div>
-                <dt className="text-[var(--ink-muted)]">Height</dt>
-                <dd className="font-medium text-[var(--ink)]">
-                  {building.heightFt.toLocaleString()} ft
-                </dd>
+            <div className="min-w-0">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="operator-detail__meta">
+                    {[
+                      building.cluster
+                        ? CLUSTER_LABELS[building.cluster]
+                        : null,
+                      building.neighborhood,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "Manhattan"}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[var(--op-ink)] md:text-3xl">
+                    {building.name}
+                  </h2>
+                  {building.nicknames?.length ? (
+                    <p className="mt-1 text-sm text-[var(--op-muted)]">
+                      Also known as {building.nicknames.join(", ")}
+                    </p>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="operator-detail__close relative z-10 shrink-0 px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] uppercase"
+                >
+                  Close
+                </button>
               </div>
-              <div>
-                <dt className="text-[var(--ink-muted)]">On skyline</dt>
-                <dd className="font-medium text-[var(--ink)]">
-                  {building.yearDemolished != null
-                    ? `${building.yearCompleted}–${building.yearDemolished}`
-                    : `${building.yearCompleted}–present`}
-                </dd>
-              </div>
-              {building.status === "demolished" ? (
-                <div>
-                  <dt className="text-[var(--ink-muted)]">Status</dt>
-                  <dd className="font-medium text-[var(--ink)]">Demolished</dd>
-                </div>
-              ) : null}
-              {building.floors != null ? (
-                <div>
-                  <dt className="text-[var(--ink-muted)]">Floors</dt>
-                  <dd className="font-medium text-[var(--ink)]">
-                    {building.floors}
-                  </dd>
-                </div>
-              ) : null}
-              {building.architect ? (
-                <div className="col-span-2 sm:col-span-1">
-                  <dt className="text-[var(--ink-muted)]">Architect</dt>
-                  <dd className="font-medium text-[var(--ink)]">
-                    {building.architect}
-                  </dd>
-                </div>
-              ) : null}
-              {building.style ? (
-                <div>
-                  <dt className="text-[var(--ink-muted)]">Style</dt>
-                  <dd className="font-medium text-[var(--ink)]">
-                    {building.style}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
 
-            {building.shortBlurb ? (
-              <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                {building.shortBlurb}
-              </p>
-            ) : null}
+              <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="operator-detail__stat">
+                  <dt>Height</dt>
+                  <dd>{building.heightFt.toLocaleString()} ft</dd>
+                </div>
+                <div className="operator-detail__stat">
+                  <dt>On skyline</dt>
+                  <dd>
+                    {building.yearDemolished != null
+                      ? `${building.yearCompleted}–${building.yearDemolished}`
+                      : `${building.yearCompleted}–present`}
+                  </dd>
+                </div>
+                {building.status === "demolished" ? (
+                  <div className="operator-detail__stat">
+                    <dt>Status</dt>
+                    <dd>Demolished</dd>
+                  </div>
+                ) : null}
+                {building.floors != null ? (
+                  <div className="operator-detail__stat">
+                    <dt>Floors</dt>
+                    <dd>{building.floors}</dd>
+                  </div>
+                ) : null}
+                {building.architect ? (
+                  <div className="operator-detail__stat col-span-2 sm:col-span-1">
+                    <dt>Architect</dt>
+                    <dd>{building.architect}</dd>
+                  </div>
+                ) : null}
+                {building.style ? (
+                  <div className="operator-detail__stat">
+                    <dt>Style</dt>
+                    <dd>{building.style}</dd>
+                  </div>
+                ) : null}
+              </dl>
 
-            {building.wikipediaUrl ? (
-              <a
-                href={building.wikipediaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block text-sm text-[var(--river)] underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline"
-              >
-                Read more
-              </a>
-            ) : null}
+              {building.shortBlurb ? (
+                <p className="mt-4 max-w-2xl text-[14px] leading-relaxed text-[var(--op-ink)]/85">
+                  {building.shortBlurb}
+                </p>
+              ) : null}
+
+              {building.wikipediaUrl ? (
+                <a
+                  href={building.wikipediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-xs font-bold tracking-[0.14em] text-[var(--op-signal)] uppercase underline-offset-4 hover:underline"
+                >
+                  Spec sheet →
+                </a>
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}

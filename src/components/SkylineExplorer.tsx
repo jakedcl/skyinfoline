@@ -240,7 +240,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
         <div className="water-plane relative z-10 h-10 w-full" aria-hidden />
       </div>
 
-      <div className="border-t border-[var(--line)] bg-[var(--panel-deep)]/60 py-10">
+      <div className="operator-deck px-3 py-5 sm:px-6 sm:py-7">
         <CinematicTimeline
           min={min}
           max={max}
