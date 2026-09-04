@@ -8,43 +8,45 @@ export type Era = {
 
 /**
  * NYC skyline eras — each chip filters to towers completed in that window.
- * Boundaries align with our seeded building dataset (1902–2025).
+ * Boundaries align with our seeded building dataset (1902–2025) so scrub-year
+ * captions match the towers actually on the skyline (no naming Chrysler in
+ * 1928 while only Flatiron / Met Life / Woolworth stand).
  */
 export const SKYLINE_ERAS: Era[] = [
   {
     id: "early",
     label: "Early Skyscrapers",
     startYear: 1900,
-    endYear: 1919,
-    tagline: "Flatiron, Woolworth — the first towers reshape the horizon",
+    endYear: 1929,
+    tagline: "Flatiron, Met Life, Woolworth — the first towers reshape the horizon",
   },
   {
     id: "art-deco",
     label: "Art Deco",
-    startYear: 1920,
-    endYear: 1939,
+    startYear: 1930,
+    endYear: 1949,
     tagline: "Chrysler, Empire State, 30 Rock — the race to the sky",
   },
   {
     id: "midcentury",
     label: "Midcentury Modern",
-    startYear: 1940,
+    startYear: 1950,
     endYear: 1969,
-    tagline: "Lever House, Seagram, Pan Am — glass and steel take over",
+    tagline: "Lever House, Seagram, MetLife — glass and steel take over",
   },
   {
     id: "late-modern",
     label: "Late Modern",
     startYear: 1970,
-    endYear: 1999,
-    tagline: "Twin Towers, Citicorp, AT&T — expressionism and postmodern peaks",
+    endYear: 2005,
+    tagline: "Twin Towers, Citigroup, 550 Madison — expressionism and postmodern peaks",
   },
   {
     id: "millennium",
     label: "New Millennium",
-    startYear: 2000,
+    startYear: 2006,
     endYear: 2013,
-    tagline: "Hearst, Gehry, Bank of America — downtown rebuilds after 9/11",
+    tagline: "Hearst, 8 Spruce, Bank of America — the skyline rebuilds after 9/11",
   },
   {
     id: "supertall",
