@@ -150,7 +150,7 @@ export function Skyline({
         scroller.clientWidth - SKYLINE_SCROLL_PAD_PX * 2,
       );
       // Measure intrinsic width: a locked `width: contentWidth` prevents shrink
-      // when the visible set gets narrower (era filter / iconic landing), and
+      // when the visible set gets narrower (era filter / landing subset), and
       // justify-center then parks towers off-screen past scrollLeft 0.
       const prevTransform = row.style.transform;
       const prevWidth = row.style.width;
@@ -164,7 +164,7 @@ export function Skyline({
 
       const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
       setIsNarrow(mobile);
-      // Fit iconic / modest sets to width; dense eras keep full height + scroll.
+      // Fit sparse / modest sets to width; dense eras keep full height + scroll.
       setScale(skylineFitScale(available, content, mobile));
     };
 

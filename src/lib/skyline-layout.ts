@@ -11,7 +11,7 @@ export const SKYLINE_MOBILE_PAD_TOP_PX = 32;
 export const SKYLINE_ROW_HEIGHT_PX =
   SKYLINE_MAX_PX + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
 
-/** Match CSS md breakpoint — used for mobile iconic landing. */
+/** Match CSS md breakpoint — narrow skyline chrome / fit-scale rules. */
 export const SKYLINE_MOBILE_MAX_WIDTH_PX = 768;
 /** Soft left/right breathing room at the ends of the scroller. */
 export const SKYLINE_SCROLL_PAD_PX = 40;
@@ -24,7 +24,7 @@ export const SKYLINE_MOBILE_MAX_CAP_PX = 400;
 
 /**
  * Below this fit scale on mobile, keep full tower height and allow horizontal
- * scroll (full eras / dense sets). Iconic landing (~10) usually stays above.
+ * scroll (full eras / dense sets). Sparse landing subsets usually stay above.
  */
 export const SKYLINE_MOBILE_MIN_FIT_SCALE = 0.52;
 
