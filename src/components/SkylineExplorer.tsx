@@ -12,8 +12,7 @@ import {
   yearRange,
 } from "@/lib/buildings";
 import { eraById, eraJumpYear, eraScrubBounds } from "@/lib/eras";
-import { isIconicLandingId } from "@/lib/iconic";
-import { SKYLINE_MOBILE_MAX_WIDTH_PX } from "@/lib/skyline-layout";
+import { selectLandingBuildings } from "@/lib/landingSet";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
 import type { Building } from "@/types/building";
 
@@ -21,23 +20,24 @@ type SkylineExplorerProps = {
   buildings: Building[];
 };
 
-function useIsMobile(breakpointPx = SKYLINE_MOBILE_MAX_WIDTH_PX): boolean {
-  // Match viewport on first client paint so iconic landing doesn't flash the
-  // full building set (which inflated contentWidth and hid towers off-screen).
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia(`(max-width: ${breakpointPx - 1}px)`).matches;
+/** Conservative SSR/first-paint width so landing starts sparse, then widens. */
+const LANDING_SSR_WIDTH_PX = 390;
+
+/** Track viewport width for dynamic landing density (avoids a full-set flash). */
+function useViewportWidth(): number {
+  const [width, setWidth] = useState(() => {
+    if (typeof window === "undefined") return LANDING_SSR_WIDTH_PX;
+    return window.innerWidth;
   });
 
   useEffect(() => {
-    const mq = window.matchMedia(`(max-width: ${breakpointPx - 1}px)`);
-    const sync = () => setIsMobile(mq.matches);
+    const sync = () => setWidth(window.innerWidth);
     sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, [breakpointPx]);
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
 
-  return isMobile;
+  return width;
 }
 
 export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
@@ -49,19 +49,19 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const [prevScrubYear, setPrevScrubYear] = useState(max);
   const [eraFilterId, setEraFilterId] = useState<string | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const isMobile = useIsMobile();
+  const viewportWidth = useViewportWidth();
 
   const eraFilter = eraById(eraFilterId);
   const skipYearCheck = !hasInteracted;
-  /** Mobile first paint: curated iconic set only (not a crop of the full row). */
-  const iconicLanding = isMobile && !hasInteracted;
+  /** Pre-interaction: density from viewport width + importance ranking. */
+  const isLanding = !hasInteracted;
 
   const skylineBuildings = useMemo(
     () =>
-      iconicLanding
-        ? buildings.filter((b) => isIconicLandingId(b.id))
+      isLanding
+        ? selectLandingBuildings(buildings, viewportWidth)
         : buildings,
-    [buildings, iconicLanding],
+    [buildings, isLanding, viewportWidth],
   );
 
   const viewpoint = getViewpoint(viewpointId);
@@ -108,10 +108,21 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       setSelectedId(null);
       return;
     }
-    if (selected && iconicLanding && !isIconicLandingId(selected.id)) {
+    if (
+      selected &&
+      isLanding &&
+      !skylineBuildings.some((b) => b.id === selected.id)
+    ) {
       setSelectedId(null);
     }
-  }, [scrubYear, selected, eraFilter, skipYearCheck, iconicLanding]);
+  }, [
+    scrubYear,
+    selected,
+    eraFilter,
+    skipYearCheck,
+    isLanding,
+    skylineBuildings,
+  ]);
 
   const handleScrubChange = useCallback(
     (year: number) => {
