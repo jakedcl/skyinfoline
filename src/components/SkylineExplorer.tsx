@@ -5,7 +5,6 @@ import { BuildingDetail } from "@/components/BuildingDetail";
 import { CinematicTimeline } from "@/components/CinematicTimeline";
 import { Skyline } from "@/components/Skyline";
 import { ViewpointSwitcher } from "@/components/ViewpointSwitcher";
-import { useHeroParallax } from "@/hooks/useHeroParallax";
 import {
   findBuilding,
   isSkylineVisible,
@@ -57,7 +56,6 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const skipYearCheck = !hasInteracted;
   /** Pre-interaction: tallest-by-height subset sized to viewport width. */
   const isLanding = !hasInteracted;
-  const heroBgRef = useHeroParallax<HTMLDivElement>();
 
   const skylineBuildings = useMemo(
     () =>
@@ -209,8 +207,6 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       </nav>
 
       <div className="skyline-hero flex min-h-0 flex-1 flex-col">
-        <div ref={heroBgRef} className="skyline-hero__bg" aria-hidden />
-
         <div
           className={[
             "viewpoint-atmosphere relative z-10 flex min-h-0 flex-1 flex-col transition-[filter] duration-700",
@@ -222,7 +218,10 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             <span>{viewpoint.rightLabel} →</span>
           </div>
 
-          <div className="relative min-h-0 flex-1">
+          {/* Spacer pushes skyline to the blue platform at the bottom */}
+          <div className="min-h-0 flex-1" aria-hidden />
+
+          <div className="relative z-10 w-full shrink-0">
             <Skyline
               buildings={skylineBuildings}
               selectedId={selectedId}
@@ -242,9 +241,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
           </div>
         </div>
 
-        {/* Soft perspective floor — faux ground plane under 2D cutouts */}
-        <div className="skyline-ground" aria-hidden />
-        <div className="water-plane relative z-10 h-8 w-full shrink-0 sm:h-10" aria-hidden />
+        <div className="skyline-platform relative z-10 w-full shrink-0" aria-hidden />
       </div>
 
       <div className="operator-dock shrink-0">

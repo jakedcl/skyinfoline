@@ -73,76 +73,45 @@ body {
     );
 }
 
-/* Aerial backdrop behind skyline cutouts — faux-3D depth via 2D only.
-   True 3D exploration (orbit / joysticks) is planned later. */
+/* Blue sky field — flexes with viewport; towers anchor to the platform below.
+   Aerial photo removed from the middle so buildings never float over empty map. */
 .skyline-hero {
   position: relative;
   overflow: visible;
-}
-
-.skyline-hero__bg {
-  position: absolute;
-  inset: -4%;
-  background-image: url("/background.png");
-  background-size: cover;
-  background-position: center bottom;
-  background-repeat: no-repeat;
-  pointer-events: none;
-  will-change: transform;
-  filter: saturate(0.9) brightness(0.92) contrast(1.04);
-  animation: skyline-bg-drift 28s ease-in-out infinite alternate;
-}
-
-.skyline-hero__bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
   background:
     radial-gradient(
-      ellipse 70% 40% at 50% 78%,
-      rgba(212, 137, 42, 0.14) 0%,
-      transparent 62%
-    ),
-    radial-gradient(
-      ellipse 130% 90% at 50% 108%,
-      rgba(8, 14, 22, 0.62) 0%,
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(12, 18, 28, 0.62) 0%,
-      rgba(16, 24, 36, 0.22) 18%,
-      transparent 42%,
-      rgba(14, 26, 38, 0.12) 62%,
-      rgba(18, 32, 44, 0.38) 82%,
-      rgba(20, 34, 46, 0.68) 100%
-    );
-}
-
-/* Soft perspective ground where towers meet water */
-.skyline-ground {
-  position: absolute;
-  left: -8%;
-  right: -8%;
-  bottom: 2.25rem;
-  height: min(22vw, 120px);
-  z-index: 2;
-  pointer-events: none;
-  transform-origin: center bottom;
-  transform: perspective(720px) rotateX(62deg);
-  background:
-    radial-gradient(
-      ellipse 55% 70% at 50% 40%,
-      rgba(255, 255, 255, 0.06) 0%,
+      ellipse 90% 55% at 50% 0%,
+      rgba(232, 168, 56, 0.1),
       transparent 55%
     ),
     linear-gradient(
       180deg,
-      transparent 0%,
-      rgba(24, 40, 52, 0.22) 35%,
-      rgba(18, 32, 44, 0.55) 100%
+      var(--sky-top) 0%,
+      var(--sky-mid) 38%,
+      var(--sky-low) 72%,
+      #6a8fa3 88%,
+      var(--water) 100%
     );
-  opacity: 0.9;
+}
+
+/* Solid blue shelf the skyline sits on — grows/shrinks with layout, not a photo */
+.skyline-platform {
+  height: 0.65rem;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      var(--water-shine) 0%,
+      var(--water) 55%,
+      #1c3040 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 -10px 24px rgba(8, 14, 22, 0.2);
 }
 
 .water-plane {
@@ -193,21 +162,6 @@ body {
   opacity: 0.9;
   filter: blur(2.5px);
   transform: translateX(-50%) scale(1.22, 0.88);
-}
-
-@keyframes skyline-bg-drift {
-  from {
-    background-position: 48% bottom;
-  }
-  to {
-    background-position: 52% bottom;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skyline-hero__bg {
-    animation: none;
-  }
 }
 
 .skyline-scroll {
