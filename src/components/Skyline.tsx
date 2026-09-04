@@ -115,6 +115,7 @@ export function Skyline({
   const [scale, setScale] = useState(1);
   const [contentWidth, setContentWidth] = useState(0);
   const [skylineMaxPx, setSkylineMaxPx] = useState(SKYLINE_MAX_PX);
+  const [isNarrow, setIsNarrow] = useState(false);
   const [measuredAspects, setMeasuredAspects] = useState<
     Record<string, number>
   >({});
@@ -140,16 +141,23 @@ export function Skyline({
         0,
         scroller.clientWidth - SKYLINE_SCROLL_PAD_PX * 2,
       );
-      const prev = row.style.transform;
+      // Measure intrinsic width: a locked `width: contentWidth` prevents shrink
+      // when the visible set gets narrower (era filter / iconic landing), and
+      // justify-center then parks towers off-screen past scrollLeft 0.
+      const prevTransform = row.style.transform;
+      const prevWidth = row.style.width;
       row.style.transform = "none";
+      row.style.width = "max-content";
       const content = row.scrollWidth;
-      row.style.transform = prev;
+      row.style.width = prevWidth;
+      row.style.transform = prevTransform;
       if (content <= 0 || available <= 0) return;
       setContentWidth(content);
 
-      const isMobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
+      const mobile = scroller.clientWidth < SKYLINE_MOBILE_MAX_WIDTH_PX;
+      setIsNarrow(mobile);
       // Mobile: keep full tower height and scroll horizontally — don't shrink.
-      if (isMobile) {
+      if (mobile) {
         setScale(1);
       } else {
         setScale(Math.min(1, available / content));
@@ -206,7 +214,12 @@ export function Skyline({
           />
           <div
             ref={rowRef}
-            className="relative z-[1] flex origin-top-left items-end justify-center pb-0 pt-20"
+            className={[
+              "relative z-[1] flex origin-top-left items-end pb-0 pt-20",
+              // Mobile scrolls at full tower size — start at the first tower so
+              // scrollLeft 0 is never empty padding from justify-center.
+              isNarrow || scale < 1 ? "justify-start" : "justify-center",
+            ].join(" ")}
             style={{
               gap: GAP_PX,
               minHeight: rowHeightPx,

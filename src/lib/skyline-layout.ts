@@ -12,15 +12,15 @@ export const SKYLINE_SCROLL_PAD_PX = 40;
 /** Hover / selected tower pop — bases stay planted via transform-origin bottom. */
 export const SKYLINE_HOVER_SCALE = 1.1;
 
-/** Mobile tower max: substantial viewport fraction, capped for very tall screens. */
-export const SKYLINE_MOBILE_VH_FRACTION = 0.55;
-export const SKYLINE_MOBILE_MAX_CAP_PX = 520;
+/** Mobile tower max: taller than desktop, without dominating the first screen. */
+export const SKYLINE_MOBILE_VH_FRACTION = 0.42;
+export const SKYLINE_MOBILE_MAX_CAP_PX = 400;
 
 export function skylineRowHeightPx(maxPx: number): number {
   return maxPx + SKYLINE_ROW_EXTRA_PX + SKYLINE_LABEL_RESERVE_PX;
 }
 
-/** Desktop stays at SKYLINE_MAX_PX; mobile uses min(55vh, 520), never below desktop. */
+/** Desktop stays at SKYLINE_MAX_PX; mobile uses min(42vh, 400), never below desktop. */
 export function skylineMaxPxForViewport(
   viewportWidthPx: number,
   viewportHeightPx: number,

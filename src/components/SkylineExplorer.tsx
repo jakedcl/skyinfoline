@@ -22,7 +22,12 @@ type SkylineExplorerProps = {
 };
 
 function useIsMobile(breakpointPx = SKYLINE_MOBILE_MAX_WIDTH_PX): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+  // Match viewport on first client paint so iconic landing doesn't flash the
+  // full building set (which inflated contentWidth and hid towers off-screen).
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia(`(max-width: ${breakpointPx - 1}px)`).matches;
+  });
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${breakpointPx - 1}px)`);
