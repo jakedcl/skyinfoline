@@ -11,7 +11,7 @@ import {
   skylineNeighbors,
   yearRange,
 } from "@/lib/buildings";
-import { eraById, eraJumpYear, eraScrubBounds, erasByIds } from "@/lib/eras";
+import { erasByIds } from "@/lib/eras";
 import { selectLandingBuildings } from "@/lib/landingSet";
 import { SKYLINE_MOBILE_MAX_WIDTH_PX } from "@/lib/skyline-layout";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
@@ -53,7 +53,8 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
   const viewportWidth = useViewportWidth();
 
   const eraFilters = erasByIds(eraFilterIds);
-  const skipYearCheck = !hasInteracted;
+  /** Landing set, or era filters active: lifespan scrub does not drive visibility. */
+  const skipYearCheck = !hasInteracted || eraFilterIds.length > 0;
   /** Pre-interaction: tallest-by-height subset sized to viewport width. */
   const isLanding = !hasInteracted;
 
@@ -136,6 +137,12 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
     [eraFilterIds.length, min, max],
   );
 
+  /** Click timeline track while filtering → leave filter mode, restore scrubber. */
+  const handleResumeTimeline = useCallback(() => {
+    setHasInteracted(true);
+    setEraFilterIds([]);
+  }, []);
+
   useEffect(() => {
     setPrevScrubYear(scrubYear);
   }, [scrubYear]);
@@ -175,21 +182,11 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
 
   const handleEraSelect = (eraId: string) => {
     setHasInteracted(true);
-    setEraFilterIds((prev) => {
-      const next = prev.includes(eraId)
+    setEraFilterIds((prev) =>
+      prev.includes(eraId)
         ? prev.filter((id) => id !== eraId)
-        : [...prev, eraId];
-      const selectedEras = erasByIds(next);
-      if (selectedEras.length > 0) {
-        const bounds = eraScrubBounds(selectedEras, min, max);
-        const focus =
-          eraById(eraId) && next.includes(eraId)
-            ? eraJumpYear(eraById(eraId)!, max)
-            : bounds.max;
-        setScrubYear(Math.min(bounds.max, Math.max(bounds.min, focus)));
-      }
-      return next;
-    });
+        : [...prev, eraId],
+    );
   };
 
   return (
@@ -252,6 +249,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             value={scrubYear}
             eraFilterIds={eraFilterIds}
             onChange={handleScrubChange}
+            onResumeTimeline={handleResumeTimeline}
             onEraSelect={handleEraSelect}
           />
         </div>
