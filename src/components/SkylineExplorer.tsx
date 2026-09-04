@@ -13,6 +13,7 @@ import {
 } from "@/lib/buildings";
 import { eraById, eraJumpYear, eraScrubBounds } from "@/lib/eras";
 import { selectLandingBuildings } from "@/lib/landingSet";
+import { SKYLINE_MOBILE_MAX_WIDTH_PX } from "@/lib/skyline-layout";
 import { getViewpoint, type ViewpointId } from "@/lib/viewpoints";
 import type { Building } from "@/types/building";
 
@@ -224,7 +225,9 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
             sortDirection={viewpoint.sortDirection}
             viewpointLabel={`${viewpoint.label}, ${viewpoint.heading}`}
             newlyBuiltIds={newlyBuiltIds}
-            forceFitWidth={isLanding}
+            forceFitWidth={
+              isLanding || viewportWidth < SKYLINE_MOBILE_MAX_WIDTH_PX
+            }
             onSelect={setSelectedId}
             onHover={setHoveredId}
           />
