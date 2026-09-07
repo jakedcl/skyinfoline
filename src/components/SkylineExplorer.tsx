@@ -194,7 +194,7 @@ export function SkylineExplorer({ buildings }: SkylineExplorerProps) {
       <nav className="relative z-20 shrink-0 border-b border-white/10 bg-[var(--sky-top)]/85 px-4 py-2.5 backdrop-blur-sm sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
           <h1 className="text-base font-semibold tracking-tight text-white sm:text-lg">
-            Skyinfoline
+            Sky Info Line 2
           </h1>
           <ViewpointSwitcher
             value={viewpointId}
