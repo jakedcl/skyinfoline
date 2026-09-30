@@ -1,73 +1,55 @@
 # Skyinfoline
 
-Interactive, stylized Manhattan skyline (Jersey City / west perspective). Left → right = north → south.
+An interactive, stylized view of the Manhattan skyline as seen from the west (Jersey City), with north on the left and south on the right. Buildings are transparent PNG cutouts stored in Sanity and scaled by height. It is a flat illustrated skyline, not a 3D city model.
 
-**Project roadmap:** see [`docs/PROJECTS.md`](./docs/PROJECTS.md) for structured work tabs (content, viewpoints v2, compare mode, etc.).
+Live at [skyinfoline.vercel.app](https://skyinfoline.vercel.app).
+
+![Skyinfoline](docs/screenshot.png)
+
+## What it does
+
+- Click a building to open a detail panel. Left, right and Escape work from the keyboard.
+- An era timeline with play and pause. Buildings appear once they are completed, and towers that no longer stand (the Twin Towers, for example) disappear after their demolition year.
+- Two viewpoints: Jersey City looking east, and the Brooklyn Bridge looking west.
+- Each building has a name, height, year, architect, cluster, style, nicknames, an importance value that sets its visual weight, and a skyline order.
+
+Content is edited in Sanity Studio and published without a code deploy.
 
 ## Stack
 
-- Next.js (App Router) + TypeScript + Tailwind
-- **Sanity** for buildings + transparent PNG cutouts
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Sanity with an embedded Studio at `/studio`, deployed on Vercel.
 
-## Edit buildings (easy)
+## Running it locally
 
-1. Open **[Skyinfoline Studio](https://skyinfoline.sanity.studio/)** (or locally `http://localhost:3000/studio`)
-2. Sign in with your Sanity account
-3. **Create / edit / delete** Building documents
-4. Upload a **transparent PNG** on the “Skyline cutout” field
-5. Set **Skyline order** (`orderIndex`) — lower = farther south; the skyline draws north→south (left→right) from Jersey City.
-6. Optional **Year demolished** for towers no longer standing (e.g. Twin Towers: 2001). They appear only between completed and demolished years on the timeline.
-7. Click **Publish**
+```sh
+npm install
+cp .env.example .env.local
+npm run dev
+```
 
-The live site reads published buildings from Sanity. No code deploy needed for content changes.
+Set these in `.env.local`:
 
-### Transparent PNGs
-
-Yes — still supported. Upload a PNG with alpha on `cutout`. The skyline uses a PNG CDN URL so transparency is kept. No image → silhouette fallback.
-
-**Tip:** Crop PNGs tight to the building silhouette (minimal transparent padding above the spire). Extra empty space at the top of the file will push labels away from the visible tower.
-
-## Local env
-
-Copy `.env.example` → `.env.local`:
-
-```bash
+```
 NEXT_PUBLIC_SANITY_PROJECT_ID=re2nvive
 NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_SANITY_API_VERSION=2025-08-25
 ```
 
-Add the same `NEXT_PUBLIC_*` vars in the Vercel project settings for previews/production.
+The site is at http://localhost:3000 and the Studio at http://localhost:3000/studio. Add the same variables to your Vercel project for previews and production.
 
-## Develop
+## Editing buildings
 
-```bash
-npm install
-npm run dev
-```
-
-- Site: http://localhost:3000  
-- Studio: http://localhost:3000/studio  
+1. Open the [Studio](https://skyinfoline.sanity.studio/) or `/studio` locally and sign in with Sanity.
+2. Create or edit a Building document.
+3. Upload a transparent PNG to the cutout field. Crop it tight to the silhouette, because empty space above a spire pushes the label away from the tower.
+4. Set the skyline order (lower means further south) and, for towers that are gone, the year demolished.
+5. Publish.
 
 ## Scripts
 
-- `npm run dev` — local server + embedded Studio
-- `npm run build` — production build
-- `npm run lint` — ESLint
-- `npm run seed` — re-seed Manhattan buildings (needs `SANITY_WRITE_TOKEN`)
+- `npm run dev` starts the site and the embedded Studio
+- `npm run build` makes a production build
+- `npm run lint` runs ESLint
+- `npm run seed` reseeds the Manhattan buildings and uploads cutouts from `building-cutouts/`. It needs `SANITY_WRITE_TOKEN` in `.env.local`.
 
-### Adding building cutout PNGs
-
-PNG files are gitignored (large assets). To add or refresh cutouts on **`main`**:
-
-```bash
-git checkout main
-git pull
-cp ~/Documents/Codex/.../building-cutouts/*.png building-cutouts/
-git add building-cutouts/
-git commit -m "Add building cutout PNGs"
-git push
-npm run seed
-```
-
-Use descriptive filenames as exported (see `building-cutouts/filename-map.json`) or rename to `{id}.png` — both work. See [`building-cutouts/README.md`](./building-cutouts/README.md) for the full filename list.
+See `building-cutouts/README.md` for the cutout filenames the seed script expects.
