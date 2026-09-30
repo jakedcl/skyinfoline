@@ -1,10 +1,6 @@
 # Skyinfoline — Projects
 
-Structured work tabs for Skyinfoline. When starting a new Cursor thread, point the agent here:
-
-> “Work on **Tab 2** from `docs/PROJECTS.md`.”
-
-Update this file when a tab’s status changes (`active` → `done` → `parked`).
+Structured work tabs for Skyinfoline. Update this file when a tab’s status changes (`active` → `done` → `parked`).
 
 ---
 
@@ -95,10 +91,3 @@ Update this file when a tab’s status changes (`active` → `done` → `parked`
 - Two viewpoints: **Jersey City** (north → south) and **Brooklyn Bridge** (south → north)
 - `cluster`, `style`, `nicknames`, `skylineImportance` fields
 
----
-
-## How to use in Cursor
-
-1. Open a **new thread** when context gets long.
-2. Say: *“Read `docs/PROJECTS.md`. Work on Tab X.”*
-3. When something ships, update status in this file (or ask the agent to).
