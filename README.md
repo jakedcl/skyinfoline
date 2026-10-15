@@ -9,11 +9,13 @@ Live at [skyinfoline.vercel.app](https://skyinfoline.vercel.app).
 ## What it does
 
 - Click a building to open a detail panel. Left, right and Escape work from the keyboard.
-- An era timeline with play and pause. Buildings appear once they are completed, and towers that no longer stand (the Twin Towers, for example) disappear after their demolition year.
+- An era timeline with a year slider and era chips. Buildings appear once they are completed, and towers that no longer stand (the Twin Towers, for example) disappear after their demolition year.
 - Two viewpoints: Jersey City looking east, and the Brooklyn Bridge looking west.
-- Each building has a name, height, year, architect, cluster, style, nicknames, an importance value that sets its visual weight, and a skyline order.
+- Each building has a name, height, year, architect, cluster, style, nicknames, an importance value (stored, not used for drawing yet), and a skyline order.
 
 Content is edited in Sanity Studio and published without a code deploy.
+
+See [docs/how-it-works.md](docs/how-it-works.md) for how the skyline is computed and how the seed script behaves.
 
 ## Stack
 
