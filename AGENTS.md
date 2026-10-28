@@ -2,6 +2,10 @@
 
 Interactive, stylized Manhattan skyline seen from the west (north on the left). Buildings are transparent PNG cutouts in Sanity, scaled by height. It's a flat illustration, not a 3D model. Live at skyinfoline.vercel.app.
 
+## Dev framework
+
+This repo follows Jake's dev framework: [jakedcl/dev-framework](https://github.com/jakedcl/dev-framework) (start at its `AGENTS.md`). The framework is the source of truth; if anything in this file conflicts with it, the framework wins.
+
 ## Stack
 - Next.js 16.3 (App Router), React 19.2, TypeScript, Tailwind CSS 4, styled-components 6.
 - Sanity 6 + next-sanity 13. Project `re2nvive`, dataset `production`. Studio is embedded at `/studio`.
