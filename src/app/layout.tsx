@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://skyinfoline.vercel.app'),
   title: "Skyinfoline — NYC Skyline",
   description:
     "A stylized, interactive Manhattan skyline—Jersey City or Brooklyn Bridge, scrub through history.",
