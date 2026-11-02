@@ -41,7 +41,7 @@ The site is at http://localhost:3000 and the Studio at http://localhost:3000/stu
 
 ## Editing buildings
 
-1. Open the [Studio](https://skyinfoline.sanity.studio/) or `/studio` locally and sign in with Sanity.
+1. Open the Studio at [skyinfoline.vercel.app/studio](https://skyinfoline.vercel.app/studio) (or `/studio` locally) and sign in with Sanity.
 2. Create or edit a Building document.
 3. Upload a transparent PNG to the cutout field. Crop it tight to the silhouette, because empty space above a spire pushes the label away from the tower.
 4. Set the skyline order (lower means further south) and, for towers that are gone, the year demolished.
