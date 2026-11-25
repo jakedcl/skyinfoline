@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, ExternalLink, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
-import { BuildingPhotos } from "@/components/building-photos";
+import { BuildingPhotoGallery } from "@/components/building-photo-gallery";
+import { BuildingPhotoFigure } from "@/components/building-photos";
 import { StatusLabel } from "@/components/building-row";
 import { MapPanel } from "@/components/map-panel";
 import {
@@ -184,7 +185,7 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
   const { point, isArchived, evidence: locationEvidence } = getLocation(building);
   const historical = isHistorical(status);
   const relations = relatedBuildings(building);
-  const photos = getBuildingPhotos(id);
+  const [leadPhoto, ...galleryPhotos] = getBuildingPhotos(id);
   const description = building.research.stage !== "source_indexed" && building.significance.reason;
 
   return (
@@ -198,12 +199,13 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
           <StatusLabel status={status} />
           {statusDate && <span>As of {statusDate}</span>}
           {address && <span className="entry-address"><MapPin size={15} aria-hidden="true" />{displayAddress(address)}</span>}
+          {galleryPhotos.length > 0 && <a href="#photos">Photos</a>}
           <a href="#sources">Sources</a>
         </div>
       </header>
 
-      <div className={`entry-grid${photos.length ? " has-photos" : ""}`}>
-        {(description || photos.length > 0) && (
+      <div className={`entry-grid${leadPhoto ? " has-photos" : ""}`}>
+        {(description || leadPhoto) && (
           <div className="entry-lead">
             {description && (
               <div className="entry-deck">
@@ -211,7 +213,11 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
                 <CitationLinks claims={citationsFor(building, "/significance")} />
               </div>
             )}
-            {photos.length > 0 && <BuildingPhotos photos={photos} />}
+            {leadPhoto && (
+              <section className="entry-photos" aria-label="Lead photograph">
+                <BuildingPhotoFigure photo={leadPhoto} />
+              </section>
+            )}
           </div>
         )}
         {(point || !!building.viewing?.length) && (
@@ -255,6 +261,7 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
               </ul>
             </section>
           )}
+          {galleryPhotos.length > 0 && <BuildingPhotoGallery photos={galleryPhotos} />}
           <EntrySources building={building} locationEvidence={locationEvidence} />
         </div>
       </div>

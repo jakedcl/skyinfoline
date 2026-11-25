@@ -134,13 +134,28 @@ h2 { font-size: clamp(2rem, 3.3vw, 3.1rem); letter-spacing: -.025em; }
 .entry-deck p { margin: 0; max-width: 56ch; color: #36433b; font-size: 1.21rem; line-height: 1.58; }
 .entry-deck + .entry-photos { margin-top: 1.15rem; }
 .entry-photo { margin: 0; border: 1px solid var(--line); background: var(--card); }
-.entry-photo + .entry-photo { margin-top: 1rem; }
 .entry-photo-frame { background: #eae7de; }
 .entry-photo-frame img { display: block; width: 100%; height: auto; max-height: 35rem; object-fit: contain; }
 .entry-photo figcaption { padding: .7rem .8rem .8rem; font-size: .94rem; }
 .photo-date { color: var(--muted); }
 .photo-credit { display: flex; flex-wrap: wrap; align-items: baseline; gap: .12rem .75rem; margin-top: .25rem; color: var(--muted); font-size: .85rem; }
 .photo-credit a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: .18em; }
+.photo-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr)); align-items: stretch; gap: .85rem; margin: 0; padding: 0; list-style: none; }
+.photo-gallery-tile { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); text-align: left; }
+.photo-gallery-tile img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; background: #eae7de; }
+.photo-gallery-tile span { flex: 1; display: block; padding: .55rem .7rem; font-size: .9rem; font-weight: 650; }
+.photo-gallery-tile:hover { border-color: var(--accent); color: var(--accent-dark); }
+.photo-dialog { position: fixed; inset: 0; margin: auto; width: min(calc(100% - 1.5rem), 57rem); max-height: calc(100dvh - 1.5rem); overflow: auto; overscroll-behavior: contain; border: 1px solid var(--line); padding: .7rem; background: var(--paper); color: var(--ink); }
+.photo-dialog::backdrop { background: #202824b8; }
+html:has(.photo-dialog[open]) { overflow: hidden; }
+.photo-dialog-header, .photo-dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: .55rem; }
+.photo-dialog-header { margin-bottom: .6rem; }
+.photo-dialog-header h3 { min-width: 0; font-family: var(--serif); font-size: clamp(1.45rem, 4.5vw, 2.1rem); line-height: 1.04; }
+.photo-dialog-footer { margin-top: .6rem; }
+.photo-dialog-footer > span { color: var(--muted); font-size: .88rem; }
+.photo-dialog button { flex-shrink: 0; min-height: 2.75rem; padding: .35rem .65rem; border: 1px solid var(--line); background: var(--card); font-size: .9rem; font-weight: 650; }
+.photo-dialog button:hover { border-color: var(--accent); color: var(--accent-dark); }
+.photo-dialog .entry-photo-frame img { max-height: min(55dvh, 37rem); }
 .entry-section { margin-top: 2rem; }
 .entry-section h2, .location-card h2 { margin-bottom: .6rem; }
 .entry-note p { margin: 0; max-width: 65ch; }
