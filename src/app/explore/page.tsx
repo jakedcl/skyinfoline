@@ -82,6 +82,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
           <strong>{matches.length.toLocaleString("en-US")} {matches.length === 1 ? "building" : "buildings"}</strong>
           {markers && <span>{markers.features.length.toLocaleString("en-US")} mapped</span>}
           {hasFilters && <Link href={explorePath({ view })}>Clear filters</Link>}
+          {view && <Link href="/lower-manhattan-3d">Lower Manhattan in 3D</Link>}
         </div>
         <nav className="view-toggle" aria-label="Results view">
           <Link aria-current={view ? undefined : "page"} href={explorePath(filters)}><List size={16} aria-hidden="true" /> List</Link>

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Map, Search } from "lucide-react";
+import { Box, ChevronRight, Map, Search } from "lucide-react";
 import { BuildingRow } from "@/components/building-row";
 import { boroughCounts, featuredBuildings } from "@/lib/catalog";
 import { boroughs, explorePath } from "@/lib/presentation";
@@ -35,8 +35,8 @@ export default function Home() {
             <Image src="/nyc-skyline-from-brooklyn.jpg" alt="Early twentieth-century Lower Manhattan skyline seen across the East River from the Brooklyn waterfront" fill preload sizes="(max-width: 760px) 90vw, 46vw" />
           </div>
           <figcaption>
-            <span>New York skyline from Brooklyn, 1900–1920</span>
-            <a href="https://www.loc.gov/item/2016796126/">Library of Congress</a>
+            <span>New York skyline from Brooklyn, 1900–1920 · <a href="https://www.loc.gov/item/2016796126/">Library of Congress</a></span>
+            <Link href="/skyline">Identify the buildings</Link>
           </figcaption>
         </figure>
       </section>
@@ -44,7 +44,10 @@ export default function Home() {
       <section className="borough-section" aria-labelledby="borough-title">
         <div className="section-head">
           <h2 id="borough-title">Explore by borough</h2>
-          <Link className="text-link" href="/explore?view=map"><Map size={17} aria-hidden="true" /> Open the map</Link>
+          <span className="section-links">
+            <Link className="text-link" href="/lower-manhattan-3d"><Box size={17} aria-hidden="true" /> Lower Manhattan in 3D</Link>
+            <Link className="text-link" href="/explore?view=map"><Map size={17} aria-hidden="true" /> Open the map</Link>
+          </span>
         </div>
         <ul className="borough-list">
           {boroughs.map((borough) => (

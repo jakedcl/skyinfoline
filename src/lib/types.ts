@@ -122,3 +122,33 @@ export type BuildingSummary = {
 export type MapMarker = { id: string; name: string; status: string };
 export type AtlasMarkers = FeatureCollection<Point, MapMarker>;
 export type AtlasOutlines = FeatureCollection<Polygon | MultiPolygon>;
+
+export type ImageBox = { left: number; top: number; right: number; bottom: number };
+
+export type VisualTarget = {
+  entity_id: string;
+  identification: "source_identified" | "visually_identified" | "tentative";
+  image_box: ImageBox | null;
+  confidence: number | null;
+  notes: string;
+  evidence: Evidence[];
+};
+
+export type ViewObservation = {
+  id: string;
+  kind: string;
+  captured_on: AtlasDate | null;
+  media: { title: string; item_url: string; creator: string | null; rights: string; license_url: string | null } | null;
+  targets: VisualTarget[];
+  evidence: Evidence[];
+  notes: string | null;
+};
+
+export type Viewpoint = {
+  id: string;
+  name: string;
+  kind: string;
+  location_description: string;
+  evidence: Evidence[];
+  observations: ViewObservation[];
+};

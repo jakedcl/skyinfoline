@@ -231,3 +231,53 @@ html:has(.photo-dialog[open]) { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   *, *::after, *::before { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* Lower Manhattan 3D pilot and skyline photo */
+.district-page, .skyline-page { padding-block: 2.4rem 4rem; }
+.district-intro { max-width: 44rem; margin: .9rem 0 1.5rem; color: var(--muted); font-size: 1.05rem; line-height: 1.55; }
+.district-layout { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 1.25rem; align-items: start; }
+.map-panel.district-map { height: min(40rem, 76vh); min-height: 24rem; }
+.selection-detail { display: block; margin-bottom: .45rem; color: var(--muted); font-size: .88rem; }
+.district-list h2 { font-family: var(--sans); font-size: .93rem; font-weight: 700; letter-spacing: 0; margin-bottom: .5rem; line-height: 1.35; }
+.district-list ol { margin: 0; padding: 0; list-style: none; max-height: min(37.5rem, 72vh); overflow-y: auto; border-top: 1px solid var(--line); }
+.district-list button { width: 100%; min-height: 2.75rem; display: flex; justify-content: space-between; align-items: center; gap: .75rem; padding: .45rem .55rem; border-bottom: 1px solid var(--line); text-align: left; font-size: .9rem; line-height: 1.3; }
+.district-list button:hover { background: var(--card); }
+.district-list button[aria-pressed="true"] { background: var(--green); color: #fff; }
+.district-height { flex: none; color: var(--muted); font-variant-numeric: tabular-nums; font-size: .85rem; }
+.district-list button[aria-pressed="true"] .district-height { color: #fff; }
+.district-notes { max-width: 50rem; margin-top: 2.4rem; }
+.district-notes h2 { margin-bottom: .8rem; }
+.district-notes ul { margin: 0 0 1rem; padding-left: 1.1rem; display: grid; gap: .6rem; line-height: 1.55; }
+.district-notes a { text-decoration: underline; text-underline-offset: .18em; }
+.section-links { display: inline-flex; flex-wrap: wrap; gap: .5rem 1.25rem; }
+
+.skyline-layout { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 1.25rem 1.5rem; align-items: start; }
+.skyline-photo { position: relative; background: #d5d7d1; grid-row: span 2; }
+.skyline-photo img { display: block; width: 100%; height: 100%; }
+.skyline-target { position: absolute; min-width: 1.6rem; border: 2px solid transparent; border-radius: .15rem; background: transparent; }
+.skyline-target:hover, .skyline-target:focus-visible { border-color: #fffaf2cc; background: #a4402614; }
+.skyline-target[aria-pressed="true"] { border-color: var(--accent); background: #a4402626; box-shadow: 0 0 0 1px #fffaf2; }
+.skyline-target .skyline-number { position: absolute; left: 50%; top: 0; transform: translate(-50%, -115%); }
+.skyline-number { display: inline-grid; place-items: center; flex: none; width: 1.55rem; height: 1.55rem; border-radius: 50%; background: var(--accent); color: #fff; font-size: .8rem; font-weight: 750; border: 2px solid #fffaf2; }
+.skyline-detail { min-height: 9rem; padding: 1rem 1.1rem; background: var(--card); border: 1px solid var(--line); }
+.skyline-detail h2 { font-size: 2rem; margin-bottom: .35rem; }
+.skyline-detail p { margin: 0 0 .7rem; line-height: 1.5; }
+.skyline-kind { color: var(--accent-dark); font-size: .78rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+.skyline-meta, .skyline-hint { color: var(--muted); font-size: .9rem; }
+.skyline-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.skyline-list button { width: 100%; min-height: 3rem; display: flex; align-items: center; gap: .7rem; padding: .5rem .4rem; border-bottom: 1px solid var(--line); text-align: left; }
+.skyline-list button:hover { background: var(--card); }
+.skyline-list button[aria-pressed="true"] { background: #a4402614; }
+.skyline-list strong { display: block; font-size: .93rem; line-height: 1.3; }
+.skyline-list small { color: var(--muted); font-size: .82rem; }
+
+@media (max-width: 1150px) {
+  .district-layout, .skyline-layout { grid-template-columns: minmax(0, 1fr); }
+  .skyline-photo { grid-row: auto; }
+  .district-list ol { max-height: 22rem; }
+}
+@media (max-width: 760px) {
+  .map-panel.district-map { height: 70vh; min-height: 20rem; }
+  .district-map .map-selection { top: 3rem; bottom: auto; width: min(21rem, calc(100% - 3.6rem)); }
+  .skyline-number { width: 1.3rem; height: 1.3rem; font-size: .7rem; border-width: 1.5px; }
+}
