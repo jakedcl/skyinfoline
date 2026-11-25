@@ -1,8 +1,15 @@
 # Atlas inputs
 
-These JSONL files are the website projection of NYC Building Atlas release 0.3 (November 24, 2026). The full canonical research release is maintained separately. The projection keeps stable IDs, sourced building facts, references, and City building outlines. It excludes unresolved identities and bulk or discovery-only references without independent identity evidence. It omits raw archival assets and internal decision records from the research bundle.
+These JSONL files are the website projection of NYC Building Atlas release 0.3, including the November 25, 2026 Lower Manhattan update. The full canonical research release is maintained separately. The projection keeps stable IDs, sourced building facts, references, and City building outlines. It excludes unresolved identities and bulk or discovery-only references without independent identity evidence. It omits raw archival assets and internal decision records from the research bundle.
 
 To regenerate from a local copy of a complete atlas release, run `node scripts/prepare-atlas.mjs /absolute/path/to/nyc-building-atlas` from the repository root. Use a new output directory as a second argument to compare a release before replacing the checked-in projection.
+
+## Adding a building batch
+
+1. Start with a short list of buildings from the area being reviewed. Search the full research catalog by names, aliases and addresses, then check the City footprint ID and BIN where available. Update existing records in place and keep documented predecessors, successors and adjacent towers distinct.
+2. Record the reason for inclusion, identity, primary address, status, date, existing building type and one visual clue in the research release. Put the building type in `architecture.building_type` through the `building_type` row in `research/profile-claims.psv` so the same value appears on the building page and in Explore filters. Cite individual facts and leave unverified details blank.
+3. Match the City outline and roof height when the physical building can be verified. Reuse the inspected City snapshots and fetch targeted updates for changed or missing features. Add any cleared photo with its item link and credit.
+4. Rebuild in staging, compare the IDs and records with the current research release, then run the research export and related-table checks. Regenerate the website tables and review the diff. Test search, building pages, filters and location links on the preview. Check 3D for standing buildings within its district that have a verified outline and roof height.
 
 `profile-enrichments.json` records additional research for selected building pages. Each claim uses an existing building ID and note field, plus the source ID, locator, and dates. A claim can link directly to the relevant item within a source collection. The projection appends the notes and assigns citations to their exact field paths. Add new source IDs here when the research release does not already carry them.
 
