@@ -23,6 +23,23 @@ export type Source = {
   url: string;
 };
 
+export type BuildingPhoto = {
+  entity_id: string;
+  url: string;
+  title: string;
+  creator: string | null;
+  credit: string | null;
+  rights: string;
+  license_url: string | null;
+  depicted_date: AtlasDate | null;
+  path: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+  changes: string | null;
+};
+
 export type AtlasPoint = {
   lon: number;
   lat: number;

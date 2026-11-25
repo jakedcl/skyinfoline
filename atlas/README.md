@@ -7,3 +7,5 @@ To regenerate from a local copy of a complete atlas release, run `node scripts/p
 The location and landmark layers are derived from NYC Open Data and credited in the source registry, including the NYC Office of Technology and Innovation and the NYC Landmarks Preservation Commission. Source dates, locators, and available claim paths are stored with the individual records. The source registry records source-specific reuse terms.
 
 The homepage photo is a separate item from the Library of Congress Prints and Photographs Division, Detroit Publishing Co., [New York skyline from Brooklyn](https://www.loc.gov/item/2016796126/), dated between 1900 and 1920. The Library states that there are no known restrictions on publication.
+
+`building-photos.jsonl` carries publication copies selected for building pages. It uses the canonical asset fields and joins to buildings by `entity_id`. Each row records the source item, depicted date, creator, credit, rights, and changes made to the copy in `public/building-photos/`. The generated atlas projection leaves these manually reviewed records in place. The image rights in each row also apply to the copy in this repository.
