@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { displayAddress, showDate, statusGroups } from "./presentation";
 import type {
-  AtlasGeometry, AtlasMarkers, AtlasOutlines, Building, BuildingSummary, Evidence, Source, StatusEvent,
+  AtlasGeometry, AtlasMarkers, AtlasOutlines, Building, BuildingPhoto, BuildingSummary, Evidence, Source, StatusEvent,
 } from "./types";
 
 function readRows<T>(file: string): T[] {
@@ -26,6 +26,7 @@ const catalog = readRows<Building>("buildings.jsonl");
 const context = readRows<Building>("context-entities.jsonl");
 const sources = new Map(readRows<Source>("source-registry.jsonl").map((source) => [source.source_id, source]));
 const statusHistory = indexBy(readRows<StatusEvent>("status-history.jsonl"), (event) => event.entity_id);
+const buildingPhotos = indexBy(readRows<BuildingPhoto>("building-photos.jsonl"), (photo) => photo.entity_id);
 let outlineIndex: Map<string, AtlasGeometry[]> | undefined;
 
 export const publicBuildings = catalog.filter((record) =>
@@ -61,6 +62,10 @@ function normalizeAddress(value: string) {
 
 export function getBuilding(id: string) {
   return buildingsById.get(id);
+}
+
+export function getBuildingPhotos(id: string) {
+  return buildingPhotos.get(id) ?? [];
 }
 
 function relatedAddress(building: Building) {

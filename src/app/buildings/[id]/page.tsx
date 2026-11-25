@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft, ExternalLink, MapPin } from "lucide-react";
 import { notFound } from "next/navigation";
+import { BuildingPhotos } from "@/components/building-photos";
 import { StatusLabel } from "@/components/building-row";
 import { MapPanel } from "@/components/map-panel";
 import {
-  citationsFor, getBuilding, getLocation, getOutlines, getStatusEvents, markersFor, relatedBuildings, sourceLink, uniqueReferences,
+  citationsFor, getBuilding, getBuildingPhotos, getLocation, getOutlines, getStatusEvents, markersFor,
+  relatedBuildings, sourceLink, uniqueReferences,
 } from "@/lib/catalog";
 import { buildingPath, displayAddress, humanize, isHistorical, showDate } from "@/lib/presentation";
 import type { Building, Evidence } from "@/lib/types";
@@ -182,6 +184,8 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
   const { point, isArchived, evidence: locationEvidence } = getLocation(building);
   const historical = isHistorical(status);
   const relations = relatedBuildings(building);
+  const photos = getBuildingPhotos(id);
+  const description = building.research.stage !== "source_indexed" && building.significance.reason;
 
   return (
     <article className="frame entry-page">
@@ -198,35 +202,19 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
         </div>
       </header>
 
-      <div className="entry-grid">
-        <div className="entry-main">
-          {building.research.stage !== "source_indexed" && building.significance.reason && (
-            <div className="entry-deck">
-              <p>{building.significance.reason}</p>
-              <CitationLinks claims={citationsFor(building, "/significance")} />
-            </div>
-          )}
-          <EntryFacts building={building} />
-          <EntryNotes building={building} />
-          <EntryTimeline building={building} />
-          {relations.length > 0 && (
-            <section className="entry-section">
-              <h2>Related buildings and sites</h2>
-              <ul className="related-list">
-                {relations.map(({ relation, target, index, link }) => (
-                  <li key={index}>
-                    <span className="label">{humanize(relation.type)}</span>
-                    {link ? <Link href={buildingPath(target.id, backHref)}>{target.canonical_name}</Link> : <strong>{target.canonical_name}</strong>}
-                    {relation.description && <p>{relation.description}</p>}
-                    <CitationLinks claims={citationsFor(building, `/relationships/${index}`)} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          <EntrySources building={building} locationEvidence={locationEvidence} />
-        </div>
-        {(point || building.viewing?.length) && (
+      <div className={`entry-grid${photos.length ? " has-photos" : ""}`}>
+        {(description || photos.length > 0) && (
+          <div className="entry-lead">
+            {description && (
+              <div className="entry-deck">
+                <p>{description}</p>
+                <CitationLinks claims={citationsFor(building, "/significance")} />
+              </div>
+            )}
+            {photos.length > 0 && <BuildingPhotos photos={photos} />}
+          </div>
+        )}
+        {(point || !!building.viewing?.length) && (
           <aside className="entry-aside">
             <div className="location-card">
               <h2>{historical ? "Historical location" : "Location"}</h2>
@@ -248,6 +236,27 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
             </div>
           </aside>
         )}
+        <div className="entry-main">
+          <EntryFacts building={building} />
+          <EntryNotes building={building} />
+          <EntryTimeline building={building} />
+          {relations.length > 0 && (
+            <section className="entry-section">
+              <h2>Related buildings and sites</h2>
+              <ul className="related-list">
+                {relations.map(({ relation, target, index, link }) => (
+                  <li key={index}>
+                    <span className="label">{humanize(relation.type)}</span>
+                    {link ? <Link href={buildingPath(target.id, backHref)}>{target.canonical_name}</Link> : <strong>{target.canonical_name}</strong>}
+                    {relation.description && <p>{relation.description}</p>}
+                    <CitationLinks claims={citationsFor(building, `/relationships/${index}`)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <EntrySources building={building} locationEvidence={locationEvidence} />
+        </div>
       </div>
     </article>
   );
