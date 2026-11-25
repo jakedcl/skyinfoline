@@ -1,6 +1,6 @@
 # Atlas inputs
 
-These JSONL files are the website projection of NYC Building Atlas release 0.3 (November 24, 2026). The full canonical research release is maintained separately. The projection keeps stable IDs, sourced building facts, references, and City building outlines. It excludes unresolved identities and bulk or discovery-only references without independent identity evidence. It omits raw archival assets and internal decision records from the research bundle.
+These JSONL files are the website projection of NYC Building Atlas release 0.3, including the November 25, 2026 Lower Manhattan update. The full canonical research release is maintained separately. The projection keeps stable IDs, sourced building facts, references, and City building outlines. It excludes unresolved identities and bulk or discovery-only references without independent identity evidence. It omits raw archival assets and internal decision records from the research bundle.
 
 To regenerate from a local copy of a complete atlas release, run `node scripts/prepare-atlas.mjs /absolute/path/to/nyc-building-atlas` from the repository root. Use a new output directory as a second argument to compare a release before replacing the checked-in projection.
 
