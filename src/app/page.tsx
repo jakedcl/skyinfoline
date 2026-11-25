@@ -4,6 +4,9 @@ import { ChevronRight, Map, Search } from "lucide-react";
 import { BuildingRow } from "@/components/building-row";
 import { boroughCounts, featuredBuildings } from "@/lib/catalog";
 import { boroughs, explorePath } from "@/lib/presentation";
+import { homeDescription, homeTitle, pageMetadata } from "@/lib/site-metadata";
+
+export const metadata = pageMetadata("/", homeTitle, homeDescription);
 
 const examples = ["Jenga Building", "Original Penn Station", "30 Rock"];
 
