@@ -12,12 +12,13 @@ async function readRows(directory, filename) {
   return document.split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
 
-const [buildings, context, events, shapes, registry] = await Promise.all([
+const [buildings, context, events, shapes, registry, enrichments] = await Promise.all([
   readRows("data", "buildings.jsonl"),
   readRows("data", "context-entities.jsonl"),
   readRows("data", "status-history.jsonl"),
   readRows("data", "building-geometry.jsonl"),
   readRows("research", "source-registry.jsonl"),
+  readFile(new URL("../atlas/profile-enrichments.json", import.meta.url), "utf8").then(JSON.parse),
 ]);
 
 const limitedSources = new Set(["SKY-TEN", "CTBUH", "AIA-GUIDE"]);
@@ -59,6 +60,20 @@ function publicBuilding(building) {
 }
 
 const projectedBuildings = eligible.map(publicBuilding);
+const profiles = new Map(projectedBuildings.map((building) => [building.id, building]));
+const noteFields = new Set(["cultural_history", "visual_identifiers", "fun_facts"]);
+for (const { entity_id, field, text, evidence } of enrichments.claims) {
+  const profile = profiles.get(entity_id);
+  if (!profile || !noteFields.has(field) || !text?.trim() || !evidence?.source_id || !evidence.locator) {
+    throw new Error(`Invalid profile claim for ${entity_id} at ${field}.`);
+  }
+  if (profile[field]?.includes(text)) {
+    throw new Error(`Duplicate profile claim for ${entity_id} at ${field}.`);
+  }
+  const lines = profile[field] ??= [];
+  profile.evidence.push({ ...evidence, paths: [`/${field}/${lines.length}`] });
+  lines.push(text);
+}
 const projectedContext = includedContext.map(publicBuilding);
 const projectedEvents = events.filter((event) => ids.has(event.entity_id) && !event.is_catalog_summary)
   .flatMap((event) => {
@@ -76,11 +91,12 @@ const projectedShapes = shapes.filter((outline) =>
 const usedSources = new Set([...projectedBuildings, ...projectedContext, ...projectedEvents, ...projectedShapes].flatMap(
   (record) => [...record.evidence, ...(record.alternatives ?? [])].map((claim) => claim.source_id),
 ));
-const projectedRegistry = registry.filter((source) => usedSources.has(source.source_id))
+const projectedRegistry = [...registry, ...enrichments.sources].filter((source) => usedSources.has(source.source_id))
   .map(({ source_id, title, owner, url, reuse }) => ({ source_id, title, owner, url, reuse }));
 
-if (new Set(projectedRegistry.map((entry) => entry.source_id)).size !== usedSources.size) {
-  throw new Error("A public record references a source missing from the registry.");
+if (projectedRegistry.length !== usedSources.size ||
+    new Set(projectedRegistry.map((entry) => entry.source_id)).size !== usedSources.size) {
+  throw new Error("The public source registry contains a missing or duplicate source ID.");
 }
 
 const data = new Map([
