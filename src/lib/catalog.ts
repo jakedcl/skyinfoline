@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { displayAddress, showDate, statusGroups } from "./presentation";
 import type {
-  AtlasGeometry, AtlasMarkers, AtlasOutlines, Building, BuildingPhoto, BuildingSummary, Evidence, Source, StatusEvent,
+  AtlasGeometry, AtlasMarkers, AtlasOutlines, Building, BuildingPhoto, BuildingSummary, Evidence, Source, StatusEvent, Viewpoint,
 } from "./types";
 
 function readRows<T>(file: string): T[] {
@@ -265,3 +265,30 @@ export const featuredBuildings = featuredNames.flatMap((name) => {
 export const boroughCounts = new Map(
   [...indexBy(publicBuildings, (record) => record.borough)].map(([borough, records]) => [borough, records.length]),
 );
+
+const viewpoints = readRows<Viewpoint>("viewpoints.jsonl");
+
+for (const viewpoint of viewpoints) {
+  for (const observation of viewpoint.observations) {
+    for (const target of observation.targets) {
+      if (!buildingsById.has(target.entity_id)) {
+        throw new Error(`Viewpoint ${viewpoint.id} tags ${target.entity_id}, which is not a published building.`);
+      }
+    }
+  }
+}
+
+// The skyline pilot uses the first photo observation that has tagged buildings.
+export function getSkyline() {
+  for (const viewpoint of viewpoints) {
+    for (const observation of viewpoint.observations) {
+      const targets = observation.targets.flatMap((target) => {
+        const building = buildingsById.get(target.entity_id);
+        if (!building || !target.image_box) return [];
+        return [{ ...target, image_box: target.image_box, building: summarize(building) }];
+      });
+      if (targets.length && observation.media) return { viewpoint, observation, media: observation.media, targets };
+    }
+  }
+  return undefined;
+}

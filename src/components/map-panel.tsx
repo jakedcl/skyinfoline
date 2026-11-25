@@ -2,17 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { blankStyle, baseStyle } from "@/lib/map-style";
 import { buildingPath } from "@/lib/presentation";
 import { StatusLabel } from "./building-row";
 import type { AtlasMarkers, AtlasOutlines, MapMarker } from "@/lib/types";
-
-const baseStyle = "https://tiles.openfreemap.org/styles/positron";
-const blankStyle = {
-  version: 8 as const,
-  glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-  sources: {},
-  layers: [{ id: "background", type: "background" as const, paint: { "background-color": "#e7ecea" } }],
-};
 
 type Camera = { center: [number, number]; zoom: number };
 type Props = {

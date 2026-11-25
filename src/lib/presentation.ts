@@ -102,3 +102,15 @@ export function buildingPath(id: string, back?: string) {
   const query = back ? "?" + new URLSearchParams({ back }).toString() : "";
   return "/buildings/" + id + query;
 }
+
+const backDestinations = [
+  { pattern: /^\/explore(?:\?|$)/, label: "Back to explore" },
+  { pattern: /^\/lower-manhattan-3d(?:\?|$)/, label: "Back to the 3D view" },
+  { pattern: /^\/skyline(?:\?|$)/, label: "Back to the skyline photo" },
+];
+
+export function backLinkFor(back: string | string[] | undefined) {
+  const value = typeof back === "string" ? back : "";
+  const match = backDestinations.find(({ pattern }) => pattern.test(value));
+  return match ? { href: value, label: match.label } : { href: "/explore", label: "Back to explore" };
+}

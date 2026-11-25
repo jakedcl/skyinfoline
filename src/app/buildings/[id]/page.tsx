@@ -10,7 +10,7 @@ import {
   citationsFor, getBuilding, getBuildingPhotos, getLocation, getOutlines, getStatusEvents, markersFor,
   relatedBuildings, sourceLink, uniqueReferences,
 } from "@/lib/catalog";
-import { buildingPath, displayAddress, humanize, isHistorical, showDate } from "@/lib/presentation";
+import { backLinkFor, buildingPath, displayAddress, humanize, isHistorical, showDate } from "@/lib/presentation";
 import { pageMetadata } from "@/lib/site-metadata";
 import type { Building, Evidence } from "@/lib/types";
 
@@ -186,7 +186,8 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
   if (!building) notFound();
 
   const { back } = await searchParams;
-  const backHref = typeof back === "string" && /^\/explore(?:\?|$)/.test(back) ? back : "/explore";
+  const backTarget = backLinkFor(back);
+  const backHref = backTarget.href;
   const address = building.addresses?.[0]?.text;
   const status = building.status?.value ?? "unknown";
   const statusDate = showDate(building.status?.as_of);
@@ -198,7 +199,7 @@ export default async function BuildingPage({ params, searchParams }: PageProps) 
 
   return (
     <article className="frame entry-page">
-      <Link className="back-link" href={backHref}><ChevronLeft size={18} aria-hidden="true" /> Back to explore</Link>
+      <Link className="back-link" href={backHref}><ChevronLeft size={18} aria-hidden="true" /> {backTarget.label}</Link>
       <header className="entry-header">
         <Link className="eyebrow" href={`/explore?borough=${encodeURIComponent(building.borough)}`}>{building.borough}</Link>
         <h1>{building.canonical_name}</h1>
