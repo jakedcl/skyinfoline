@@ -9,16 +9,21 @@ if (!input || resolve(input) === resolve(destination)) {
 
 async function readRows(directory, filename) {
   const document = await readFile(resolve(input, directory, filename), "utf8");
+  return parseRows(document);
+}
+
+function parseRows(document) {
   return document.split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
 
-const [buildings, context, events, shapes, registry, enrichments] = await Promise.all([
+const [buildings, context, events, shapes, registry, enrichments, viewpoints] = await Promise.all([
   readRows("data", "buildings.jsonl"),
   readRows("data", "context-entities.jsonl"),
   readRows("data", "status-history.jsonl"),
   readRows("data", "building-geometry.jsonl"),
   readRows("research", "source-registry.jsonl"),
   readFile(new URL("../atlas/profile-enrichments.json", import.meta.url), "utf8").then(JSON.parse),
+  readFile(new URL("../atlas/viewpoints.jsonl", import.meta.url), "utf8").then(parseRows),
 ]);
 
 const limitedSources = new Set(["SKY-TEN", "CTBUH", "AIA-GUIDE"]);
@@ -88,7 +93,10 @@ const projectedShapes = shapes.filter((outline) =>
   outline.evidence.some((claim) => claim.source_id === "OTI-FOOT" || claim.source_id === "OTI-FOOT-HIST"),
 ).map(({ entity_id, role, condition, geometry, evidence }) => ({ entity_id, role, condition, geometry, evidence }));
 
-const usedSources = new Set([...projectedBuildings, ...projectedContext, ...projectedEvents, ...projectedShapes].flatMap(
+const viewpointRecords = viewpoints.flatMap((viewpoint) => [
+  viewpoint, ...viewpoint.observations.flatMap((observation) => [observation, ...observation.targets]),
+]);
+const usedSources = new Set([...projectedBuildings, ...projectedContext, ...projectedEvents, ...projectedShapes, ...viewpointRecords].flatMap(
   (record) => [...record.evidence, ...(record.alternatives ?? [])].map((claim) => claim.source_id),
 ));
 const projectedRegistry = [...registry, ...enrichments.sources].filter((source) => usedSources.has(source.source_id))

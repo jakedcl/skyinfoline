@@ -278,5 +278,6 @@ html:has(.photo-dialog[open]) { overflow: hidden; }
 }
 @media (max-width: 760px) {
   .map-panel.district-map { height: 70vh; min-height: 20rem; }
+  .district-map .map-selection { top: 3rem; bottom: auto; width: min(21rem, calc(100% - 3.6rem)); }
   .skyline-number { width: 1.3rem; height: 1.3rem; font-size: .7rem; border-width: 1.5px; }
 }

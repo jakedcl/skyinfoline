@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { buildingPath } from "@/lib/presentation";
 import type { BuildingSummary, ImageBox } from "@/lib/types";
 
@@ -40,9 +40,23 @@ export function SkylinePhoto({ src, width, height, alt, targets, initialId }: Pr
     initialId && targets.some((target) => target.entity_id === initialId) ? initialId : null,
   );
   const selected = targets.find((target) => target.entity_id === selectedId) ?? null;
+  const detail = useRef<HTMLDivElement>(null);
+  const revealDetail = useRef(false);
+
+  function selectFromList(id: string) {
+    if (selectedId === id) detail.current?.scrollIntoView({ block: "nearest" });
+    else {
+      revealDetail.current = true;
+      setSelectedId(id);
+    }
+  }
 
   useEffect(() => {
     window.history.replaceState(window.history.state, "", backPath(selectedId));
+    if (revealDetail.current) {
+      revealDetail.current = false;
+      detail.current?.scrollIntoView({ block: "nearest" });
+    }
   }, [selectedId]);
 
   return (
@@ -72,7 +86,7 @@ export function SkylinePhoto({ src, width, height, alt, targets, initialId }: Pr
         })}
       </div>
 
-      <div className="skyline-detail" aria-live="polite">
+      <div className="skyline-detail" aria-live="polite" ref={detail}>
         {selected ? (
           <>
             <p className="skyline-kind">{identificationNames[selected.identification] ?? "Identified"}</p>
@@ -89,7 +103,7 @@ export function SkylinePhoto({ src, width, height, alt, targets, initialId }: Pr
       <ol className="skyline-list">
         {targets.map((target, index) => (
           <li key={target.entity_id}>
-            <button type="button" aria-pressed={target.entity_id === selectedId} onClick={() => setSelectedId(target.entity_id)}>
+            <button type="button" aria-pressed={target.entity_id === selectedId} onClick={() => selectFromList(target.entity_id)}>
               <span className="skyline-number" aria-hidden="true">{index + 1}</span>
               <span>
                 <strong>{target.building.name}</strong>

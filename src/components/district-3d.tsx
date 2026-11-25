@@ -76,6 +76,8 @@ function withContextBuildings(style: StyleSpecification, selectedId: string | nu
 
 export function District3D({ buildings, shapes, boundary, initialId }: Props) {
   const container = useRef<HTMLDivElement>(null);
+  const selectionCard = useRef<HTMLDivElement>(null);
+  const revealSelection = useRef(false);
   const mapRef = useRef<MapLibreMap | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "fallback" | "error">("loading");
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -85,11 +87,15 @@ export function District3D({ buildings, shapes, boundary, initialId }: Props) {
   const selected = buildings.find((building) => building.id === selectedId) ?? null;
 
   const select = useCallback((id: string | null, fly: boolean) => {
+    if (fly) {
+      if (id === selectedRef.current) selectionCard.current?.scrollIntoView({ block: "nearest" });
+      else revealSelection.current = true;
+    }
     setSelectedId(id);
     const map = mapRef.current;
     const building = buildings.find((item) => item.id === id);
     if (map && building && fly) {
-      map.flyTo({ center: building.center, zoom: Math.max(map.getZoom(), 16), duration: 900, essential: true });
+      map.flyTo({ center: building.center, zoom: Math.max(map.getZoom(), 16), duration: 900 });
     }
   }, [buildings]);
 
@@ -99,6 +105,10 @@ export function District3D({ buildings, shapes, boundary, initialId }: Props) {
     if (map?.getLayer("district-buildings")) map.setPaintProperty("district-buildings", "fill-extrusion-color", colorFor(selectedId));
     if (map?.getLayer("context-buildings")) map.setPaintProperty("context-buildings", "fill-extrusion-opacity", contextOpacity(selectedId));
     window.history.replaceState(window.history.state, "", backPath(selectedId));
+    if (revealSelection.current) {
+      revealSelection.current = false;
+      selectionCard.current?.scrollIntoView({ block: "nearest" });
+    }
   }, [selectedId]);
 
   useEffect(() => {
@@ -226,7 +236,7 @@ export function District3D({ buildings, shapes, boundary, initialId }: Props) {
         {loadState === "fallback" && <p className="map-notice" role="status">Basemap unavailable. Atlas buildings are still shown.</p>}
         {loadState === "error" && <p className="map-notice" role="status">The 3D view couldn’t load on this device. Use the building list.</p>}
         {selected && (
-          <div className="map-selection" aria-live="polite">
+          <div className="map-selection" aria-live="polite" ref={selectionCard}>
             <p>{selected.name}</p>
             <span className="selection-detail">
               {[selected.year, `Mapped roof ${Math.round(selected.roofFeet).toLocaleString("en-US")} ft`].filter(Boolean).join(" · ")}
