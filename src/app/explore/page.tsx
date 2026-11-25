@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { List, Map, Search } from "lucide-react";
 import { BuildingRow } from "@/components/building-row";
 import { MapPanel } from "@/components/map-panel";
 import { availableTypes, markersFor, searchBuildings, searchResults } from "@/lib/catalog";
 import { boroughs, eraNames, explorePath, statusGroupNames } from "@/lib/presentation";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = { title: "Explore the atlas" };
+export const metadata = pageMetadata("/explore", "Explore the atlas", "Search and browse New York City buildings by name, address, borough, era, building type, or status.");
 
 type Params = Record<string, string | string[] | undefined>;
 

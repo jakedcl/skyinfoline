@@ -11,6 +11,7 @@ import {
   relatedBuildings, sourceLink, uniqueReferences,
 } from "@/lib/catalog";
 import { buildingPath, displayAddress, humanize, isHistorical, showDate } from "@/lib/presentation";
+import { pageMetadata } from "@/lib/site-metadata";
 import type { Building, Evidence } from "@/lib/types";
 
 type PageProps = {
@@ -21,7 +22,14 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const building = getBuilding(id);
-  return building ? { title: building.canonical_name } : { title: "Building not found" };
+  if (!building) return { title: "Building not found" };
+
+  const summary = building.research.stage !== "source_indexed" && building.significance.reason
+    ? building.significance.reason
+    : "Explore available architectural details, dates, and sources in the SkyInfoLine atlas.";
+  const description = `${building.canonical_name}, ${building.borough}. ${summary}`;
+
+  return pageMetadata(buildingPath(id), building.canonical_name, description);
 }
 
 type Fact = { label: string; text: string; paths: string[] };

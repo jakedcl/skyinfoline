@@ -44,6 +44,8 @@ h2 { font-size: clamp(2rem, 3.3vw, 3.1rem); letter-spacing: -.025em; }
 .site-footer { border-top: 1px solid var(--line); }
 .footer-inner { min-height: 6rem; padding-block: 1.2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem 1.2rem; }
 .footer-inner p { margin: 0; color: var(--muted); font-size: .88rem; }
+.footer-inner nav { display: flex; align-items: center; flex-wrap: wrap; gap: .15rem .85rem; }
+.footer-inner nav a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--accent-dark); font-size: .88rem; text-decoration: underline; text-underline-offset: .18em; }
 
 .home { padding-block: clamp(2.2rem, 4.9vw, 5rem) 4.8rem; }
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .98fr); gap: clamp(1.75rem, 5vw, 5.25rem); align-items: center; }
@@ -111,6 +113,12 @@ h2 { font-size: clamp(2rem, 3.3vw, 3.1rem); letter-spacing: -.025em; }
 .pagination a { justify-self: start; color: var(--accent-dark); text-decoration: underline; text-underline-offset: .2em; padding-block: .75rem; }
 .pagination a:last-child { justify-self: end; }
 .message-page .button-accent { margin-top: .8rem; }
+.policy-page { max-width: 49rem; }
+.policy-page h1 { font-size: clamp(3rem, 5.8vw, 5.2rem); }
+.policy-page h2 { margin-bottom: .55rem; font-size: clamp(1.8rem, 3vw, 2.35rem); }
+.policy-page h1 + p, .policy-page section { margin-top: 1.55rem; }
+.policy-page p + p { margin-top: .65rem; }
+.policy-page a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: .18em; }
 
 .map-panel { position: relative; min-height: 19rem; height: min(31rem, 68vh); border: 1px solid #b7bfb7; overflow: hidden; background: #e7ecea; }
 .map-panel.map-detail { height: clamp(15rem, 29vw, 22rem); min-height: 14rem; }
